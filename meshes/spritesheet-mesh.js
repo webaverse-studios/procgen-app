@@ -1,12 +1,12 @@
-import * as THREE from "three";
-import metaversefile from "metaversefile";
+import * as THREE from 'three'
+import metaversefile from '@webaverse-studios/metaversefile'
 import {
   // bufferSize,
   WORLD_BASE_HEIGHT,
   MIN_WORLD_HEIGHT,
   MAX_WORLD_HEIGHT,
-  maxAnisotropy,
-} from "../constants.js";
+  maxAnisotropy
+} from '../constants.js'
 const {
   useCamera,
   useProcGenManager,
@@ -16,51 +16,51 @@ const {
   useGeometryChunking,
   useLoaders,
   usePhysics,
-  useSpriting,
-} = metaversefile;
-const procGenManager = useProcGenManager();
-const { createAppUrlSpriteSheet } = useSpriting();
+  useSpriting
+} = metaversefile
+const procGenManager = useProcGenManager()
+const { createAppUrlSpriteSheet } = useSpriting()
 // const {DoubleSidedPlaneGeometry} = useGeometries();
-const { ChunkedBatchedMesh, ChunkedGeometryAllocator } = useGeometryChunking();
+const { ChunkedBatchedMesh, ChunkedGeometryAllocator } = useGeometryChunking()
 
-const camera = useCamera();
+const camera = useCamera()
 
 //
 
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localEuler = new THREE.Euler();
-const localBox = new THREE.Box3();
+const localVector = new THREE.Vector3()
+const localVector2 = new THREE.Vector3()
+const localEuler = new THREE.Euler()
+const localBox = new THREE.Box3()
 
 //
 
 export class SpritesheetPackage {
-  constructor(canvas, offsets) {
-    this.canvas = canvas;
-    this.offsets = offsets;
+  constructor (canvas, offsets) {
+    this.canvas = canvas
+    this.offsets = offsets
   }
 
-  static async loadUrls(urls) {
-    const canvas = document.createElement("canvas");
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-    const ctx = canvas.getContext("2d");
+  static async loadUrls (urls) {
+    const canvas = document.createElement('canvas')
+    canvas.width = canvasSize
+    canvas.height = canvasSize
+    const ctx = canvas.getContext('2d')
 
-    const offsets = new Float32Array(urls.length * 4);
+    const offsets = new Float32Array(urls.length * 4)
     await Promise.all(
       urls.map(async (url, index) => {
-        const numFrames = 8;
+        const numFrames = 8
 
         const spritesheet = await createAppUrlSpriteSheet(url, {
           size: spritesheetSize,
           // size: 2048,
-          numFrames,
-        });
-        const { result, worldWidth, worldHeight, worldOffset } = spritesheet;
+          numFrames
+        })
+        const { result, worldWidth, worldHeight, worldOffset } = spritesheet
 
-        const x = index % spritesheetsPerRow;
-        const y = Math.floor(index / spritesheetsPerRow);
-        ctx.drawImage(result, x * spritesheetSize, y * spritesheetSize);
+        const x = index % spritesheetsPerRow
+        const y = Math.floor(index / spritesheetsPerRow)
+        ctx.drawImage(result, x * spritesheetSize, y * spritesheetSize)
 
         // debugging
         /* const canvas = document.createElement('canvas');
@@ -77,102 +77,102 @@ export class SpritesheetPackage {
       ctx.drawImage(result, 0, 0);
       document.body.appendChild(canvas); */
 
-        offsets[index * 4] = worldOffset[0];
-        offsets[index * 4 + 1] = worldOffset[1];
-        offsets[index * 4 + 2] = worldOffset[2];
-        const worldSize = Math.max(worldWidth, worldHeight);
-        offsets[index * 4 + 3] = worldSize;
+        offsets[index * 4] = worldOffset[0]
+        offsets[index * 4 + 1] = worldOffset[1]
+        offsets[index * 4 + 2] = worldOffset[2]
+        const worldSize = Math.max(worldWidth, worldHeight)
+        offsets[index * 4 + 3] = worldSize
       })
-    );
+    )
 
-    const pkg = new SpritesheetPackage(canvas, offsets);
-    return pkg;
+    const pkg = new SpritesheetPackage(canvas, offsets)
+    return pkg
   }
 }
 
 //
 
-const canvasSize = 2048;
-const spritesheetSize = 512;
-const spritesheetsPerRow = canvasSize / spritesheetSize;
-const numAngles = 8;
-const numFramesPow2 = Math.pow(2, Math.ceil(Math.log2(numAngles)));
-const numFramesPerRow = Math.ceil(Math.sqrt(numFramesPow2));
-const maxDrawCalls = 256;
-const maxInstancesPerDrawCall = 1024;
+const canvasSize = 2048
+const spritesheetSize = 512
+const spritesheetsPerRow = canvasSize / spritesheetSize
+const numAngles = 8
+const numFramesPow2 = Math.pow(2, Math.ceil(Math.log2(numAngles)))
+const numFramesPerRow = Math.ceil(Math.sqrt(numFramesPow2))
+const maxDrawCalls = 256
+const maxInstancesPerDrawCall = 1024
 export class SpritesheetMesh extends ChunkedBatchedMesh {
-  constructor({ instance, lodCutoff }) {
-    const baseGeometry = new THREE.PlaneGeometry(1, 1);
+  constructor ({ instance, lodCutoff }) {
+    const baseGeometry = new THREE.PlaneGeometry(1, 1)
     const allocator = new ChunkedGeometryAllocator(
       baseGeometry,
       [
         {
-          name: "p",
+          name: 'p',
           Type: Float32Array,
-          itemSize: 3,
+          itemSize: 3
         },
         {
-          name: "offset",
+          name: 'offset',
           Type: Float32Array,
-          itemSize: 4,
+          itemSize: 4
         },
         {
-          name: "itemIndex",
+          name: 'itemIndex',
           Type: Float32Array,
-          itemSize: 1,
-        },
+          itemSize: 1
+        }
       ],
       {
         maxDrawCalls,
         maxInstancesPerDrawCall,
-        boundingType: "box",
+        boundingType: 'box'
       }
-    );
-    const { geometry, textures: attributeTextures } = allocator;
+    )
+    const { geometry, textures: attributeTextures } = allocator
     for (const k in attributeTextures) {
-      const texture = attributeTextures[k];
-      texture.anisotropy = maxAnisotropy;
+      const texture = attributeTextures[k]
+      texture.anisotropy = maxAnisotropy
     }
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTex: {
           value: null,
-          needsUpdate: null,
+          needsUpdate: null
         },
         cameraPos: {
           value: new THREE.Vector3(),
-          needsUpdate: false,
+          needsUpdate: false
         },
         cameraY: {
           value: 0,
-          needsUpdate: false,
+          needsUpdate: false
         },
         numAngles: {
           value: numAngles,
-          needsUpdate: true,
+          needsUpdate: true
         },
         numFramesPerRow: {
           value: numFramesPerRow,
-          needsUpdate: true,
+          needsUpdate: true
         },
         spritesheetsPerRow: {
           value: spritesheetsPerRow,
-          needsUpdate: true,
+          needsUpdate: true
         },
 
         pTexture: {
           value: attributeTextures.p,
-          needsUpdate: true,
+          needsUpdate: true
         },
         offsetTexture: {
           value: attributeTextures.offset,
-          needsUpdate: true,
+          needsUpdate: true
         },
         itemIndexTexture: {
           value: attributeTextures.itemIndex,
-          needsUpdate: true,
-        },
+          needsUpdate: true
+        }
       },
       vertexShader: `\
         precision highp float;
@@ -291,70 +291,70 @@ export class SpritesheetMesh extends ChunkedBatchedMesh {
           gl_FragColor.a = 1.;
         }
       `,
-      transparent: true,
-    });
-    super(geometry, material, allocator);
-    this.frustumCulled = false;
-    this.visible = false;
+      transparent: true
+    })
+    super(geometry, material, allocator)
+    this.frustumCulled = false
+    this.visible = false
 
-    this.instance = instance;
-    this.lodCutoff = lodCutoff;
+    this.instance = instance
+    this.lodCutoff = lodCutoff
 
-    this.offsets = new Float32Array(0);
-    this.allocatedChunks = new Map();
+    this.offsets = new Float32Array(0)
+    this.allocatedChunks = new Map()
   }
 
-  addChunk(chunk, chunkResult) {
+  addChunk (chunk, chunkResult) {
     if (chunkResult) {
-      const instances = chunkResult;
+      const instances = chunkResult
 
       if (chunk.lod >= this.lodCutoff && instances.length > 0) {
         const _renderLitterSpriteGeometry = (drawCall, instances) => {
-          const pTexture = drawCall.getTexture("p");
-          const pOffset = drawCall.getTextureOffset("p");
-          const offsetTexture = drawCall.getTexture("offset");
-          const offsetOffset = drawCall.getTextureOffset("offset");
-          const itemIndexTexture = drawCall.getTexture("itemIndex");
-          const itemIndexOffset = drawCall.getTextureOffset("itemIndex");
+          const pTexture = drawCall.getTexture('p')
+          const pOffset = drawCall.getTextureOffset('p')
+          const offsetTexture = drawCall.getTexture('offset')
+          const offsetOffset = drawCall.getTextureOffset('offset')
+          const itemIndexTexture = drawCall.getTexture('itemIndex')
+          const itemIndexOffset = drawCall.getTextureOffset('itemIndex')
 
-          let index = 0;
+          let index = 0
           for (let i = 0; i < instances.length; i++) {
-            const instance = instances[i];
-            const { instanceId, ps, qs } = instance;
+            const instance = instances[i]
+            const { instanceId, ps, qs } = instance
 
             for (let j = 0; j < ps.length; j += 3) {
-              const indexOffset = index * 4;
+              const indexOffset = index * 4
 
               // geometry
-              const px = ps[index * 3];
-              const py = ps[index * 3 + 1];
-              const pz = ps[index * 3 + 2];
-              pTexture.image.data[pOffset + indexOffset] = px;
-              pTexture.image.data[pOffset + indexOffset + 1] = py;
-              pTexture.image.data[pOffset + indexOffset + 2] = pz;
+              const px = ps[index * 3]
+              const py = ps[index * 3 + 1]
+              const pz = ps[index * 3 + 2]
+              pTexture.image.data[pOffset + indexOffset] = px
+              pTexture.image.data[pOffset + indexOffset + 1] = py
+              pTexture.image.data[pOffset + indexOffset + 2] = pz
 
               offsetTexture.image.data[offsetOffset + indexOffset] =
-                this.offsets[instanceId * 4];
+                this.offsets[instanceId * 4]
               offsetTexture.image.data[offsetOffset + indexOffset + 1] =
-                this.offsets[instanceId * 4 + 1];
+                this.offsets[instanceId * 4 + 1]
               offsetTexture.image.data[offsetOffset + indexOffset + 2] =
-                this.offsets[instanceId * 4 + 2];
+                this.offsets[instanceId * 4 + 2]
               offsetTexture.image.data[offsetOffset + indexOffset + 3] =
-                this.offsets[instanceId * 4 + 3];
+                this.offsets[instanceId * 4 + 3]
 
               itemIndexTexture.image.data[itemIndexOffset + indexOffset] =
-                instanceId;
+                instanceId
 
-              index++;
+              index++
             }
           }
 
-          drawCall.updateTexture("p", pOffset, index * 4);
-          drawCall.updateTexture("offset", offsetOffset, index * 4);
-          drawCall.updateTexture("itemIndex", itemIndexOffset, index * 4);
-        };
+          drawCall.updateTexture('p', pOffset, index * 4)
+          drawCall.updateTexture('offset', offsetOffset, index * 4)
+          drawCall.updateTexture('itemIndex', itemIndexOffset, index * 4)
+        }
 
-        const { chunkSize } = this.instance;
+        const { chunkSize } = this.instance
         const boundingBox = localBox.set(
           localVector.set(
             chunk.min.x * chunkSize,
@@ -366,108 +366,105 @@ export class SpritesheetMesh extends ChunkedBatchedMesh {
             -WORLD_BASE_HEIGHT + MAX_WORLD_HEIGHT,
             (chunk.min.y + chunk.lod) * chunkSize
           )
-        );
+        )
         const totalInstances = (() => {
-          let sum = 0;
+          let sum = 0
           for (let i = 0; i < instances.length; i++) {
-            const instance = instances[i];
-            const { ps } = instance;
-            sum += ps.length;
+            const instance = instances[i]
+            const { ps } = instance
+            sum += ps.length
           }
-          sum /= 3;
-          return sum;
-        })();
-        const drawChunk = this.allocator.allocChunk(
-          totalInstances,
-          boundingBox
-        );
-        _renderLitterSpriteGeometry(drawChunk, instances);
+          sum /= 3
+          return sum
+        })()
+        const drawChunk = this.allocator.allocChunk(totalInstances, boundingBox)
+        _renderLitterSpriteGeometry(drawChunk, instances)
 
-        const key = procGenManager.getNodeHash(chunk);
-        this.allocatedChunks.set(key, drawChunk);
+        const key = procGenManager.getNodeHash(chunk)
+        this.allocatedChunks.set(key, drawChunk)
       }
     }
   }
 
-  removeChunk(chunk) {
-    const key = procGenManager.getNodeHash(chunk);
-    const drawChunk = this.allocatedChunks.get(key);
+  removeChunk (chunk) {
+    const key = procGenManager.getNodeHash(chunk)
+    const drawChunk = this.allocatedChunks.get(key)
     if (drawChunk) {
-      this.allocator.freeChunk(drawChunk);
-      this.allocatedChunks.delete(key);
+      this.allocator.freeChunk(drawChunk)
+      this.allocatedChunks.delete(key)
     }
   }
 
-  setPackage(pkg) {
-    const { canvas } = pkg;
-    const texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
+  setPackage (pkg) {
+    const { canvas } = pkg
+    const texture = new THREE.Texture(canvas)
+    texture.needsUpdate = true
 
-    this.material.uniforms.uTex.value = texture;
-    this.material.uniforms.uTex.needsUpdate = true;
+    this.material.uniforms.uTex.value = texture
+    this.material.uniforms.uTex.needsUpdate = true
 
-    this.offsets = pkg.offsets;
+    this.offsets = pkg.offsets
 
-    this.visible = true;
+    this.visible = true
   }
 
-  update() {
-    localEuler.setFromQuaternion(camera.quaternion, "YXZ");
-    localEuler.x = 0;
-    localEuler.z = 0;
+  update () {
+    localEuler.setFromQuaternion(camera.quaternion, 'YXZ')
+    localEuler.x = 0
+    localEuler.z = 0
 
-    this.material.uniforms.cameraPos.value.copy(camera.position);
-    this.material.uniforms.cameraPos.needsUpdate = true;
+    this.material.uniforms.cameraPos.value.copy(camera.position)
+    this.material.uniforms.cameraPos.needsUpdate = true
 
-    this.material.uniforms.cameraY.value = localEuler.y;
-    this.material.uniforms.cameraY.needsUpdate = true;
+    this.material.uniforms.cameraY.value = localEuler.y
+    this.material.uniforms.cameraY.needsUpdate = true
   }
 }
 
 //
 
 export class LitterMetaMesh extends THREE.Object3D {
-  constructor({
+  constructor ({
     instance,
     // gpuTaskManager,
-    physics,
+    physics
   }) {
-    super();
+    super()
 
     this.polygonMesh = new PolygonMesh({
-      instance,
-    });
-    this.add(this.polygonMesh);
+      instance
+    })
+    this.add(this.polygonMesh)
 
     this.spritesheetMesh = new SpritesheetMesh({
-      instance,
-    });
-    this.add(this.spritesheetMesh);
+      instance
+    })
+    this.add(this.spritesheetMesh)
 
-    this.physics = physics;
+    this.physics = physics
   }
 
-  update() {
-    this.spritesheetMesh.update();
+  update () {
+    this.spritesheetMesh.update()
   }
 
-  addChunk(chunk, chunkResult) {
-    this.polygonMesh.addChunk(chunk, chunkResult);
-    this.spritesheetMesh.addChunk(chunk, chunkResult);
+  addChunk (chunk, chunkResult) {
+    this.polygonMesh.addChunk(chunk, chunkResult)
+    this.spritesheetMesh.addChunk(chunk, chunkResult)
   }
 
-  removeChunk(chunk) {
-    this.polygonMesh.removeChunk(chunk);
-    this.spritesheetMesh.removeChunk(chunk);
+  removeChunk (chunk) {
+    this.polygonMesh.removeChunk(chunk)
+    this.spritesheetMesh.removeChunk(chunk)
   }
 
-  async loadUrls(urls) {
+  async loadUrls (urls) {
     const [polygonPackage, spritesheetPackage] = await Promise.all([
       PolygonPackage.loadUrls(urls, this.physics),
-      SpritesheetPackage.loadUrls(urls),
-    ]);
-    this.polygonMesh.setPackage(polygonPackage);
-    this.spritesheetMesh.setPackage(spritesheetPackage);
+      SpritesheetPackage.loadUrls(urls)
+    ])
+    this.polygonMesh.setPackage(polygonPackage)
+    this.spritesheetMesh.setPackage(spritesheetPackage)
 
     /* // XXX debugging
     {

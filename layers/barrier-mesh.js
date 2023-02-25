@@ -1,63 +1,63 @@
-import * as THREE from "three";
-import metaversefile from "metaversefile";
+import * as THREE from 'three'
+import metaversefile from '@webaverse-studios/metaversefile'
 import {
   bufferSize,
   WORLD_BASE_HEIGHT,
   MIN_WORLD_HEIGHT,
-  MAX_WORLD_HEIGHT,
-} from "../constants.js";
+  MAX_WORLD_HEIGHT
+} from '../constants.js'
 
-const { useProcGenManager, useGeometryBuffering } = metaversefile;
-const { BufferedMesh, GeometryAllocator } = useGeometryBuffering();
-const procGenManager = useProcGenManager();
+const { useProcGenManager, useGeometryBuffering } = metaversefile
+const { BufferedMesh, GeometryAllocator } = useGeometryBuffering()
+const procGenManager = useProcGenManager()
 
 //
 
-const localVector3D = new THREE.Vector3();
-const localVector3D2 = new THREE.Vector3();
-const localBox = new THREE.Box3();
+const localVector3D = new THREE.Vector3()
+const localVector3D2 = new THREE.Vector3()
+const localBox = new THREE.Box3()
 
 //
 
 export class BarrierMesh extends BufferedMesh {
-  constructor({ instance, gpuTaskManager }) {
+  constructor ({ instance, gpuTaskManager }) {
     const allocator = new GeometryAllocator(
       [
         {
-          name: "position",
+          name: 'position',
           Type: Float32Array,
-          itemSize: 3,
+          itemSize: 3
         },
         {
-          name: "normal",
+          name: 'normal',
           Type: Float32Array,
-          itemSize: 3,
+          itemSize: 3
         },
         {
-          name: "uv",
+          name: 'uv',
           Type: Float32Array,
-          itemSize: 2,
+          itemSize: 2
         },
         {
-          name: "position2D",
+          name: 'position2D',
           Type: Int32Array,
-          itemSize: 2,
-        },
+          itemSize: 2
+        }
       ],
       {
-        bufferSize,
+        bufferSize
         // boundingType: 'box',
         // hasOcclusionCulling: true
       }
-    );
+    )
 
-    const { geometry } = allocator;
+    const { geometry } = allocator
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uPosition2D: {
           value: new THREE.Vector2(),
-          needsUpdate: false,
-        },
+          needsUpdate: false
+        }
       },
       vertexShader: `\
         attribute ivec2 position2D;
@@ -86,13 +86,13 @@ export class BarrierMesh extends BufferedMesh {
 
         // const vec3 lineColor1 = vec3(${new THREE.Color(0x66bb6a)
           .toArray()
-          .join(", ")});
+          .join(', ')});
         const vec3 lineColor1 = vec3(${new THREE.Color(0x42a5f5)
           .toArray()
-          .join(", ")});
+          .join(', ')});
         const vec3 lineColor2 = vec3(${new THREE.Color(0x9575cd)
           .toArray()
-          .join(", ")});
+          .join(', ')});
 
         /* float edgeFactor(vec3 bary, float width) {
           vec3 d = fwidth(bary);
@@ -136,22 +136,22 @@ export class BarrierMesh extends BufferedMesh {
 
       clipping: false,
       fog: false,
-      lights: false,
-    });
+      lights: false
+    })
 
-    super(geometry, material);
+    super(geometry, material)
 
-    this.instance = instance;
-    this.gpuTaskManager = gpuTaskManager;
+    this.instance = instance
+    this.gpuTaskManager = gpuTaskManager
 
-    this.allocator = allocator;
-    this.gpuTasks = new Map();
-    this.geometryBindings = new Map();
+    this.allocator = allocator
+    this.gpuTasks = new Map()
+    this.geometryBindings = new Map()
   }
 
-  addChunk(chunk, chunkResult) {
+  addChunk (chunk, chunkResult) {
     if (chunkResult.barrierGeometry.positions.length > 0) {
-      const key = procGenManager.getNodeHash(chunk);
+      const key = procGenManager.getNodeHash(chunk)
       const task = this.gpuTaskManager.transact(() => {
         const _mapOffsettedIndices = (
           srcIndices,
@@ -159,58 +159,58 @@ export class BarrierMesh extends BufferedMesh {
           dstOffset,
           positionOffset
         ) => {
-          const positionIndex = positionOffset / 3;
+          const positionIndex = positionOffset / 3
           for (let i = 0; i < srcIndices.length; i++) {
-            dstIndices[dstOffset + i] = srcIndices[i] + positionIndex;
+            dstIndices[dstOffset + i] = srcIndices[i] + positionIndex
           }
-        };
+        }
         const _renderBarrierMeshDataToGeometry = (
           barrierGeometry,
           geometry,
           geometryBinding
         ) => {
-          const positionOffset = geometryBinding.getAttributeOffset("position");
-          const normalOffset = geometryBinding.getAttributeOffset("normal");
-          const uvOffset = geometryBinding.getAttributeOffset("uv");
+          const positionOffset = geometryBinding.getAttributeOffset('position')
+          const normalOffset = geometryBinding.getAttributeOffset('normal')
+          const uvOffset = geometryBinding.getAttributeOffset('uv')
           const position2DOffset =
-            geometryBinding.getAttributeOffset("position2D");
-          const indexOffset = geometryBinding.getIndexOffset();
+            geometryBinding.getAttributeOffset('position2D')
+          const indexOffset = geometryBinding.getIndexOffset()
 
           _mapOffsettedIndices(
             barrierGeometry.indices,
             geometry.index.array,
             indexOffset,
             positionOffset
-          );
+          )
 
           geometry.attributes.position.update(
             positionOffset,
             barrierGeometry.positions.length,
             barrierGeometry.positions,
             0
-          );
+          )
           geometry.attributes.normal.update(
             normalOffset,
             barrierGeometry.normals.length,
             barrierGeometry.normals,
             0
-          );
+          )
           geometry.attributes.uv.update(
             uvOffset,
             barrierGeometry.uvs.length,
             barrierGeometry.uvs,
             0
-          );
+          )
           geometry.attributes.position2D.update(
             position2DOffset,
             barrierGeometry.positions2D.length,
             barrierGeometry.positions2D,
             0
-          );
-          geometry.index.update(indexOffset, barrierGeometry.indices.length);
-        };
-        const _handleBarrierMesh = (barrierGeometry) => {
-          const { chunkSize } = this.instance;
+          )
+          geometry.index.update(indexOffset, barrierGeometry.indices.length)
+        }
+        const _handleBarrierMesh = barrierGeometry => {
+          const { chunkSize } = this.instance
 
           const boundingBox = localBox.set(
             localVector3D.set(
@@ -223,7 +223,7 @@ export class BarrierMesh extends BufferedMesh {
               -WORLD_BASE_HEIGHT + MAX_WORLD_HEIGHT,
               (chunk.min.y + chunk.lod) * chunkSize
             )
-          );
+          )
 
           const geometryBinding = this.allocator.alloc(
             barrierGeometry.positions.length,
@@ -233,17 +233,17 @@ export class BarrierMesh extends BufferedMesh {
             // max,
             // this.appMatrix,
             // barrierGeometry.peeks
-          );
+          )
           // console.log(localVector3D);
           _renderBarrierMeshDataToGeometry(
             barrierGeometry,
             this.allocator.geometry,
             geometryBinding
-          );
+          )
 
-          this.geometryBindings.set(key, geometryBinding);
-        };
-        _handleBarrierMesh(chunkResult.barrierGeometry);
+          this.geometryBindings.set(key, geometryBinding)
+        }
+        _handleBarrierMesh(chunkResult.barrierGeometry)
 
         /* const _handlePhysics = async () => {
           if (geometryBuffer) {
@@ -270,32 +270,32 @@ export class BarrierMesh extends BufferedMesh {
           }
         };
         _handlePhysics(); */
-      });
-      this.gpuTasks.set(key, task);
+      })
+      this.gpuTasks.set(key, task)
     }
   }
 
-  removeChunk(chunk) {
-    const key = procGenManager.getNodeHash(chunk);
+  removeChunk (chunk) {
+    const key = procGenManager.getNodeHash(chunk)
 
     {
-      const geometryBinding = this.geometryBindings.get(key);
+      const geometryBinding = this.geometryBindings.get(key)
       if (geometryBinding) {
-        this.allocator.free(geometryBinding);
-        this.geometryBindings.delete(key);
+        this.allocator.free(geometryBinding)
+        this.geometryBindings.delete(key)
       }
     }
     {
-      const task = this.gpuTasks.get(key);
+      const task = this.gpuTasks.get(key)
       if (task) {
-        task.cancel();
-        this.gpuTasks.delete(key);
+        task.cancel()
+        this.gpuTasks.delete(key)
       }
     }
   }
 
-  updateChunk(currentCoord) {
-    this.material.uniforms.uPosition2D.value.fromArray(currentCoord);
-    this.material.uniforms.uPosition2D.needsUpdate = true;
+  updateChunk (currentCoord) {
+    this.material.uniforms.uPosition2D.value.fromArray(currentCoord)
+    this.material.uniforms.uPosition2D.needsUpdate = true
   }
 }

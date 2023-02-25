@@ -1,140 +1,140 @@
-import * as THREE from "three";
-import metaversefile from "metaversefile";
+import * as THREE from 'three'
+import metaversefile from '@webaverse-studios/metaversefile'
 import {
   // bufferSize,
   WORLD_BASE_HEIGHT,
   MIN_WORLD_HEIGHT,
   MAX_WORLD_HEIGHT,
-  maxAnisotropy,
-} from "../constants.js";
+  maxAnisotropy
+} from '../constants.js'
 const { useCamera, useGeometries, useGeometryChunking, useProcGenManager } =
-  metaversefile;
-const procGenManager = useProcGenManager();
+  metaversefile
+const procGenManager = useProcGenManager()
 // const {DoubleSidedPlaneGeometry} = useGeometries();
-const { ChunkedBatchedMesh, ChunkedGeometryAllocator } = useGeometryChunking();
+const { ChunkedBatchedMesh, ChunkedGeometryAllocator } = useGeometryChunking()
 
 //
 
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
+const localVector = new THREE.Vector3()
+const localVector2 = new THREE.Vector3()
 // const localEuler = new THREE.Euler();
-const localBox = new THREE.Box3();
+const localBox = new THREE.Box3()
 
 //
 
-const _loadImage = (src) =>
+const _loadImage = src =>
   new Promise((accept, reject) => {
-    const img = new Image();
+    const img = new Image()
     img.onload = () => {
-      accept(img);
-    };
-    img.onerror = (err) => {
-      reject(err);
-    };
-    img.src = src;
-    img.crossOrigin = "Anonymous";
-  });
+      accept(img)
+    }
+    img.onerror = err => {
+      reject(err)
+    }
+    img.src = src
+    img.crossOrigin = 'Anonymous'
+  })
 
 //
 
-const canvasSize = 2048;
-const iconSize = 256;
-const iconsPerRow = canvasSize / iconSize;
+const canvasSize = 2048
+const iconSize = 256
+const iconsPerRow = canvasSize / iconSize
 export class IconPackage {
-  constructor(canvas) {
-    this.canvas = canvas;
+  constructor (canvas) {
+    this.canvas = canvas
   }
 
-  static async loadUrls(urls) {
+  static async loadUrls (urls) {
     const imgs = await Promise.all(
-      urls.map(async (url) => {
-        const img = await _loadImage(url);
-        return img;
+      urls.map(async url => {
+        const img = await _loadImage(url)
+        return img
       })
-    );
+    )
 
-    const canvas = document.createElement("canvas");
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-    const ctx = canvas.getContext("2d");
+    const canvas = document.createElement('canvas')
+    canvas.width = canvasSize
+    canvas.height = canvasSize
+    const ctx = canvas.getContext('2d')
     for (let i = 0; i < imgs.length; i++) {
-      const x = (i % iconsPerRow) * iconSize;
-      const y = Math.floor(i / iconsPerRow) * iconSize;
+      const x = (i % iconsPerRow) * iconSize
+      const y = Math.floor(i / iconsPerRow) * iconSize
 
-      const img = imgs[i];
-      ctx.drawImage(img, x, y, iconSize, iconSize);
+      const img = imgs[i]
+      ctx.drawImage(img, x, y, iconSize, iconSize)
     }
 
-    const pkg = new IconPackage(canvas);
-    return pkg;
+    const pkg = new IconPackage(canvas)
+    return pkg
   }
 }
 
 //
 
-const maxDrawCalls = 256;
-const maxInstancesPerDrawCall = 256;
+const maxDrawCalls = 256
+const maxInstancesPerDrawCall = 256
 export class IconMesh extends ChunkedBatchedMesh {
-  constructor({ instance, lodCutoff } = {}) {
+  constructor ({ instance, lodCutoff } = {}) {
     // allocator
-    const baseGeometry = new THREE.PlaneGeometry(1, 1);
+    const baseGeometry = new THREE.PlaneGeometry(1, 1)
     const allocator = new ChunkedGeometryAllocator(
       baseGeometry,
       [
         {
-          name: "p",
+          name: 'p',
           Type: Float32Array,
-          itemSize: 3,
+          itemSize: 3
         },
         {
-          name: "itemIndex",
+          name: 'itemIndex',
           Type: Float32Array,
-          itemSize: 1,
-        },
+          itemSize: 1
+        }
       ],
       {
         maxDrawCalls,
         maxInstancesPerDrawCall,
-        boundingType: "box",
+        boundingType: 'box'
       }
-    );
-    const { textures: attributeTextures } = allocator;
+    )
+    const { textures: attributeTextures } = allocator
     for (const k in attributeTextures) {
-      const texture = attributeTextures[k];
-      texture.anisotropy = maxAnisotropy;
+      const texture = attributeTextures[k]
+      texture.anisotropy = maxAnisotropy
     }
 
     // geometry
-    const { geometry } = allocator;
+    const { geometry } = allocator
 
     // material
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTex: {
           value: null,
-          needsUpdate: null,
+          needsUpdate: null
         },
         cameraPos: {
           value: new THREE.Vector3(),
-          needsUpdate: false,
+          needsUpdate: false
         },
         cameraQuat: {
           value: new THREE.Vector4(),
-          needsUpdate: false,
+          needsUpdate: false
         },
         iconsPerRow: {
           value: iconsPerRow,
-          needsUpdate: true,
+          needsUpdate: true
         },
 
         pTexture: {
           value: attributeTextures.p,
-          needsUpdate: true,
+          needsUpdate: true
         },
         itemIndexTexture: {
           value: attributeTextures.itemIndex,
-          needsUpdate: true,
-        },
+          needsUpdate: true
+        }
       },
       vertexShader: `\
         precision highp float;
@@ -216,30 +216,30 @@ export class IconMesh extends ChunkedBatchedMesh {
           gl_FragColor.a = 1.;
         }
       `,
-      transparent: true,
-    });
+      transparent: true
+    })
 
     // mesh
-    super(geometry, material, allocator);
-    this.frustumCulled = false;
-    this.visible = false;
+    super(geometry, material, allocator)
+    this.frustumCulled = false
+    this.visible = false
 
-    this.instance = instance;
-    this.lodCutoff = lodCutoff;
+    this.instance = instance
+    this.lodCutoff = lodCutoff
 
-    this.allocatedChunks = new Map();
+    this.allocatedChunks = new Map()
   }
 
-  addChunk(chunk, chunkResult) {
+  addChunk (chunk, chunkResult) {
     if (chunkResult) {
-      const { ps, instances } = chunkResult;
+      const { ps, instances } = chunkResult
       if (chunk.lod < this.lodCutoff && instances.length > 0) {
         const _renderIconGeometry = (drawCall, ps, instances) => {
           // console.log('got ps', ps.slice());
-          const pTexture = drawCall.getTexture("p");
-          const pOffset = drawCall.getTextureOffset("p");
-          const itemIndexTexture = drawCall.getTexture("itemIndex");
-          const itemIndexOffset = drawCall.getTextureOffset("itemIndex");
+          const pTexture = drawCall.getTexture('p')
+          const pOffset = drawCall.getTextureOffset('p')
+          const itemIndexTexture = drawCall.getTexture('itemIndex')
+          const itemIndexOffset = drawCall.getTextureOffset('itemIndex')
 
           /* if (ps.length / 3 !== instances.length) {
             debugger;
@@ -249,17 +249,17 @@ export class IconMesh extends ChunkedBatchedMesh {
           } */
 
           for (let i = 0; i < instances.length; i++) {
-            const instanceId = instances[i];
+            const instanceId = instances[i]
 
             // geometry
-            const px = ps[i * 3];
-            const py = ps[i * 3 + 1];
-            const pz = ps[i * 3 + 2];
-            pTexture.image.data[pOffset + i * 4] = px;
-            pTexture.image.data[pOffset + i * 4 + 1] = py;
-            pTexture.image.data[pOffset + i * 4 + 2] = pz;
+            const px = ps[i * 3]
+            const py = ps[i * 3 + 1]
+            const pz = ps[i * 3 + 2]
+            pTexture.image.data[pOffset + i * 4] = px
+            pTexture.image.data[pOffset + i * 4 + 1] = py
+            pTexture.image.data[pOffset + i * 4 + 2] = pz
 
-            itemIndexTexture.image.data[itemIndexOffset + i * 4] = instanceId;
+            itemIndexTexture.image.data[itemIndexOffset + i * 4] = instanceId
 
             /* pTexture.image.data[pOffset + indexOffset] = px;
             pTexture.image.data[pOffset + indexOffset + 1] = py;
@@ -271,15 +271,15 @@ export class IconMesh extends ChunkedBatchedMesh {
             offsetTexture.image.data[offsetOffset + indexOffset + 3] = this.offsets[instanceId * 4 + 3]; */
           }
 
-          drawCall.updateTexture("p", pOffset, (ps.length / 3) * 4);
+          drawCall.updateTexture('p', pOffset, (ps.length / 3) * 4)
           drawCall.updateTexture(
-            "itemIndex",
+            'itemIndex',
             itemIndexOffset,
             instances.length * 4
-          );
-        };
+          )
+        }
 
-        const { chunkSize } = this.instance;
+        const { chunkSize } = this.instance
         const boundingBox = localBox.set(
           localVector.set(
             chunk.min.x * chunkSize,
@@ -291,52 +291,52 @@ export class IconMesh extends ChunkedBatchedMesh {
             -WORLD_BASE_HEIGHT + MAX_WORLD_HEIGHT,
             (chunk.min.y + chunk.lod) * chunkSize
           )
-        );
+        )
         const drawChunk = this.allocator.allocChunk(
           instances.length,
           boundingBox
-        );
-        _renderIconGeometry(drawChunk, ps, instances);
+        )
+        _renderIconGeometry(drawChunk, ps, instances)
 
-        const key = procGenManager.getNodeHash(chunk);
-        this.allocatedChunks.set(key, drawChunk);
+        const key = procGenManager.getNodeHash(chunk)
+        this.allocatedChunks.set(key, drawChunk)
       }
     }
   }
 
-  removeChunk(chunk) {
-    const key = procGenManager.getNodeHash(chunk);
-    const drawChunk = this.allocatedChunks.get(key);
+  removeChunk (chunk) {
+    const key = procGenManager.getNodeHash(chunk)
+    const drawChunk = this.allocatedChunks.get(key)
     if (drawChunk) {
-      this.allocator.freeChunk(drawChunk);
+      this.allocator.freeChunk(drawChunk)
     }
-    this.allocatedChunks.delete(key);
+    this.allocatedChunks.delete(key)
   }
 
-  update() {
-    const camera = useCamera();
+  update () {
+    const camera = useCamera()
 
-    this.material.uniforms.cameraPos.value.copy(camera.position);
-    this.material.uniforms.cameraPos.needsUpdate = true;
+    this.material.uniforms.cameraPos.value.copy(camera.position)
+    this.material.uniforms.cameraPos.needsUpdate = true
 
-    this.material.uniforms.cameraQuat.value.x = camera.quaternion.x;
-    this.material.uniforms.cameraQuat.value.y = camera.quaternion.y;
-    this.material.uniforms.cameraQuat.value.z = camera.quaternion.z;
-    this.material.uniforms.cameraQuat.value.w = camera.quaternion.w;
-    this.material.uniforms.cameraQuat.needsUpdate = true;
+    this.material.uniforms.cameraQuat.value.x = camera.quaternion.x
+    this.material.uniforms.cameraQuat.value.y = camera.quaternion.y
+    this.material.uniforms.cameraQuat.value.z = camera.quaternion.z
+    this.material.uniforms.cameraQuat.value.w = camera.quaternion.w
+    this.material.uniforms.cameraQuat.needsUpdate = true
   }
 
-  setPackage(pkg) {
-    const { canvas } = pkg;
+  setPackage (pkg) {
+    const { canvas } = pkg
 
-    const texture = new THREE.Texture(canvas);
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.needsUpdate = true;
+    const texture = new THREE.Texture(canvas)
+    texture.minFilter = THREE.LinearFilter
+    texture.magFilter = THREE.LinearFilter
+    texture.needsUpdate = true
 
-    this.material.uniforms.uTex.value = texture;
-    this.material.uniforms.uTex.needsUpdate = true;
+    this.material.uniforms.uTex.value = texture
+    this.material.uniforms.uTex.needsUpdate = true
 
-    this.visible = true;
+    this.visible = true
   }
 }

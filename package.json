@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@webaverse-studios/eslint-config": "^1.0.0",
+    "@webaverse-studios/metaversefile": "^0.0.1",
     "eslint": "^8.34.0",
     "eslint-plugin-jsdoc": "latest",
     "eslint-plugin-promise": "latest",

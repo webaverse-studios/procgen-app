@@ -1,22 +1,22 @@
-import metaversefile from "metaversefile";
-import * as THREE from "three";
+import metaversefile from '@webaverse-studios/metaversefile'
+import * as THREE from 'three'
 
-import { TerrainMesh } from "./layers/terrain-mesh.js";
-import { LiquidMesh } from "./layers/liquid-mesh.js";
+import { TerrainMesh } from './layers/terrain-mesh.js'
+import { LiquidMesh } from './layers/liquid-mesh.js'
 // import {BarrierMesh} from './layers/barrier-mesh.js';
-import { glbUrlSpecs } from "./assets.js";
-import { GrassMesh } from "./layers/grass-mesh.js";
-import { HudMesh } from "./layers/hud-mesh.js";
+import { glbUrlSpecs } from './assets.js'
+import { GrassMesh } from './layers/grass-mesh.js'
+import { HudMesh } from './layers/hud-mesh.js'
 import {
   InstancedObjectGroup,
-  InstancedObjectMesh,
-} from "./layers/instanced-object-mesh.js";
+  InstancedObjectMesh
+} from './layers/instanced-object-mesh.js'
 
 import {
   TerrainObjectsMesh,
-  TerrainObjectSpecs,
-} from "./meshes/terrain-objects-mesh.js";
-import { _addNoLightingShaderChunk } from "./utils/utils.js";
+  TerrainObjectSpecs
+} from './meshes/terrain-objects-mesh.js'
+import { _addNoLightingShaderChunk } from './utils/utils.js'
 
 const {
   useApp,
@@ -26,81 +26,81 @@ const {
   usePhysics,
   useProcGenManager,
   useGPUTask,
-  useGenerationTask,
-} = metaversefile;
+  useGenerationTask
+} = metaversefile
 
-const { GPUTaskManager } = useGPUTask();
-const { GenerationTaskManager } = useGenerationTask();
+const { GPUTaskManager } = useGPUTask()
+const { GenerationTaskManager } = useGenerationTask()
 
 // urls
-const treeUrls = glbUrlSpecs.trees;
-const flowerUrls = glbUrlSpecs.flowers;
-const bushUrls = glbUrlSpecs.bushes.slice(0, 1);
-const rockUrls = glbUrlSpecs.rocks.slice(0, 1);
-const stoneUrls = glbUrlSpecs.stones.slice(0, 1);
-const grassUrls = glbUrlSpecs.grasses;
-const hudUrls = glbUrlSpecs.huds;
+const treeUrls = glbUrlSpecs.trees
+const flowerUrls = glbUrlSpecs.flowers
+const bushUrls = glbUrlSpecs.bushes.slice(0, 1)
+const rockUrls = glbUrlSpecs.rocks.slice(0, 1)
+const stoneUrls = glbUrlSpecs.stones.slice(0, 1)
+const grassUrls = glbUrlSpecs.grasses
+const hudUrls = glbUrlSpecs.huds
 
 // locals
 
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localVector3 = new THREE.Vector3();
-const localQuaternion = new THREE.Quaternion();
-const localMatrix = new THREE.Matrix4();
-const localMatrix2 = new THREE.Matrix4();
+const localVector = new THREE.Vector3()
+const localVector2 = new THREE.Vector3()
+const localVector3 = new THREE.Vector3()
+const localQuaternion = new THREE.Quaternion()
+const localMatrix = new THREE.Matrix4()
+const localMatrix2 = new THREE.Matrix4()
 
 // main
 
-export default (e) => {
-  const app = useApp();
-  const camera = useCamera();
-  const procGenManager = useProcGenManager();
-  const physics = usePhysics();
+export default e => {
+  const app = useApp()
+  const camera = useCamera()
+  const procGenManager = useProcGenManager()
+  const physics = usePhysics()
 
   // locals
 
-  let frameCb = null;
+  let frameCb = null
 
   // initialization
 
   e.waitUntil(
     (async () => {
-      const instance = procGenManager.getInstance("lol");
+      const instance = procGenManager.getInstance('lol')
 
       // lod tracker
       const lodTracker = await instance.createLodChunkTracker({
         minLod: 1,
         maxLod: 7,
-        lod1Range: 2,
+        lod1Range: 2
         // debug: true,
-      });
+      })
       // app.add(lodTracker.debugMesh);
       // lodTracker.debugMesh.position.y = 0.1;
       // lodTracker.debugMesh.updateMatrixWorld();
 
-      lodTracker.onPostUpdate((position) => {
+      lodTracker.onPostUpdate(position => {
         // barrierMesh.updateChunk(position);
-      });
+      })
 
       // managers
-      const gpuTaskManager = new GPUTaskManager();
-      const generationTaskManager = new GenerationTaskManager();
+      const gpuTaskManager = new GPUTaskManager()
+      const generationTaskManager = new GenerationTaskManager()
 
       // material setup
-      _addNoLightingShaderChunk();
+      _addNoLightingShaderChunk()
 
       // meshes
       const terrainMesh = new TerrainMesh({
         instance,
         gpuTaskManager,
-        physics,
-      });
-      terrainMesh.frustumCulled = false;
+        physics
+      })
+      terrainMesh.frustumCulled = false
       // ! terrainMesh.castShadow = true;
-      terrainMesh.receiveShadow = true;
-      app.add(terrainMesh);
-      terrainMesh.updateMatrixWorld();
+      terrainMesh.receiveShadow = true
+      app.add(terrainMesh)
+      terrainMesh.updateMatrixWorld()
 
       /* const barrierMesh = new BarrierMesh({
         instance,
@@ -125,35 +125,35 @@ export default (e) => {
           false
         ),
         grassMesh: new TerrainObjectSpecs(GrassMesh, grassUrls, true),
-        hudMesh: new TerrainObjectSpecs(HudMesh, hudUrls, false),
-      };
+        hudMesh: new TerrainObjectSpecs(HudMesh, hudUrls, false)
+      }
 
       const terrainObjects = new TerrainObjectsMesh(
         instance,
         physics,
         TERRAIN_OBJECTS_MESHES
-      );
-      app.add(terrainObjects);
-      terrainObjects.updateMatrixWorld();
+      )
+      app.add(terrainObjects)
+      terrainObjects.updateMatrixWorld()
 
       const liquidMesh = new LiquidMesh({
         instance,
         gpuTaskManager,
-        physics,
-      });
-      liquidMesh.frustumCulled = false;
-      app.add(liquidMesh);
-      liquidMesh.depthInvisibleList.push(terrainObjects);
-      liquidMesh.updateMatrixWorld();
+        physics
+      })
+      liquidMesh.frustumCulled = false
+      app.add(liquidMesh)
+      liquidMesh.depthInvisibleList.push(terrainObjects)
+      liquidMesh.updateMatrixWorld()
 
       // genration events handling
-      lodTracker.onChunkAdd(async (chunk) => {
-        const key = procGenManager.getNodeHash(chunk);
+      lodTracker.onChunkAdd(async chunk => {
+        const key = procGenManager.getNodeHash(chunk)
 
-        const generation = generationTaskManager.createGeneration(key);
-        generation.addEventListener("geometryadd", (e) => {
-          const { result } = e.data;
-          const { heightfield } = result;
+        const generation = generationTaskManager.createGeneration(key)
+        generation.addEventListener('geometryadd', e => {
+          const { result } = e.data
+          const { heightfield } = result
           const {
             treeInstances,
             flowerInstances,
@@ -161,14 +161,14 @@ export default (e) => {
             rockInstances,
             stoneInstances,
             grassInstances,
-            poiInstances,
-          } = heightfield;
+            poiInstances
+          } = heightfield
 
           // console.log('got heightfield', heightfield);
 
           // heightfield
-          terrainMesh.addChunk(chunk, heightfield);
-          liquidMesh.addChunk(chunk, heightfield);
+          terrainMesh.addChunk(chunk, heightfield)
+          liquidMesh.addChunk(chunk, heightfield)
           // barrierMesh.addChunk(chunk, heightfield);
 
           const terrainObjectInstances = {
@@ -178,21 +178,21 @@ export default (e) => {
             rockMesh: rockInstances,
             stoneMesh: stoneInstances,
             grassMesh: grassInstances,
-            hudMesh: poiInstances,
-          };
-          terrainObjects.addChunks(chunk, terrainObjectInstances);
-        });
-        generation.addEventListener("geometryremove", (e) => {
+            hudMesh: poiInstances
+          }
+          terrainObjects.addChunks(chunk, terrainObjectInstances)
+        })
+        generation.addEventListener('geometryremove', e => {
           // heightfield
-          terrainMesh.removeChunk(chunk);
-          liquidMesh.removeChunk(chunk);
+          terrainMesh.removeChunk(chunk)
+          liquidMesh.removeChunk(chunk)
           // barrierMesh.removeChunk(chunk);
 
-          terrainObjects.removeChunks(chunk);
-        });
+          terrainObjects.removeChunks(chunk)
+        })
 
         try {
-          const signal = generation.getSignal();
+          const signal = generation.getSignal()
           const generateFlags = {
             terrain: true,
             water: true,
@@ -200,15 +200,15 @@ export default (e) => {
             vegetation: true,
             rock: true,
             grass: true,
-            poi: false,
-          };
-          const numVegetationInstances = 1;
-          const numRockInstances = 1;
-          const numGrassInstances = 1;
-          const numPoiInstances = 1;
+            poi: false
+          }
+          const numVegetationInstances = 1
+          const numRockInstances = 1
+          const numGrassInstances = 1
+          const numPoiInstances = 1
           const options = {
-            signal,
-          };
+            signal
+          }
           const heightfield = await instance.generateChunk(
             chunk.min,
             chunk.lod,
@@ -219,89 +219,89 @@ export default (e) => {
             numGrassInstances,
             numPoiInstances,
             options
-          );
+          )
           generation.finish({
-            heightfield,
-          });
+            heightfield
+          })
         } catch (err) {
           if (err.isAbortError) {
             // console.log('got chunk add abort', chunk);
           } else {
-            throw err;
+            throw err
           }
         } /* finally {
         generations.delete(key);
       } */
-      });
-      lodTracker.onChunkRemove((chunk) => {
-        const key = procGenManager.getNodeHash(chunk);
+      })
+      lodTracker.onChunkRemove(chunk => {
+        const key = procGenManager.getNodeHash(chunk)
         // console.log('chunk', key, chunk, 'REMOVE');
-        generationTaskManager.deleteGeneration(key);
-      });
+        generationTaskManager.deleteGeneration(key)
+      })
 
       // load
       const _waitForLoad = async () => {
         await Promise.all([
           terrainMesh.waitForLoad(),
           terrainObjects.waitForLoad(),
-          liquidMesh.waitForLoad(),
-        ]);
-      };
-      await _waitForLoad();
+          liquidMesh.waitForLoad()
+        ])
+      }
+      await _waitForLoad()
 
       // frame handling
-      frameCb = (timestamp) => {
+      frameCb = timestamp => {
         const _updateLodTracker = () => {
-          const localPlayer = useLocalPlayer();
+          const localPlayer = useLocalPlayer()
 
           const appMatrixWorldInverse = localMatrix2
             .copy(app.matrixWorld)
-            .invert();
+            .invert()
           localMatrix
             .copy(localPlayer.matrixWorld)
             .premultiply(appMatrixWorldInverse)
-            .decompose(localVector, localQuaternion, localVector2);
-          const playerPosition = localVector;
+            .decompose(localVector, localQuaternion, localVector2)
+          const playerPosition = localVector
 
           localMatrix
             .copy(camera.matrixWorld)
             .premultiply(appMatrixWorldInverse)
-            .decompose(localVector2, localQuaternion, localVector3);
-          const cameraPosition = localVector2;
-          const cameraQuaternion = localQuaternion;
+            .decompose(localVector2, localQuaternion, localVector3)
+          const cameraPosition = localVector2
+          const cameraQuaternion = localQuaternion
 
           instance.setCamera(
             playerPosition,
             cameraPosition,
             cameraQuaternion,
             camera.projectionMatrix
-          );
-          lodTracker.update(playerPosition);
-        };
-        _updateLodTracker();
+          )
+          lodTracker.update(playerPosition)
+        }
+        _updateLodTracker()
 
         const _updateTerrainObjects = () => {
-          terrainObjects.update(timestamp);
-        };
-        _updateTerrainObjects();
+          terrainObjects.update(timestamp)
+        }
+        _updateTerrainObjects()
 
         const _updateLiquidMesh = () => {
-          liquidMesh.update(timestamp);
+          liquidMesh.update(timestamp)
           liquidMesh.lastUpdateCoord.set(
             lodTracker.lastUpdateCoord.x,
             lodTracker.lastUpdateCoord.y
-          );
-        };
-        _updateLiquidMesh();
+          )
+        }
+        _updateLiquidMesh()
 
-        gpuTaskManager.update();
-      };
+        gpuTaskManager.update()
+      }
     })()
-  );
+  )
 
   useFrame(({ timestamp }) => {
-    frameCb && frameCb(timestamp);
-  });
+    frameCb && frameCb(timestamp)
+  })
 
-  return app;
-};
+  return app
+}

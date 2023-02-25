@@ -1,12 +1,12 @@
-import metaversefile from "metaversefile";
-import * as THREE from "three";
+import metaversefile from '@webaverse-studios/metaversefile'
+import * as THREE from 'three'
 
-import { MATERIALS_INFO } from "../assets.js";
-import { _disableOutgoingLights } from "../utils/utils.js";
-import { NUM_TERRAIN_MATERIALS } from "./terrain-mesh.js";
+import { MATERIALS_INFO } from '../assets.js'
+import { _disableOutgoingLights } from '../utils/utils.js'
+import { NUM_TERRAIN_MATERIALS } from './terrain-mesh.js'
 
-const { useAtlasing } = metaversefile;
-const { calculateCanvasAtlasTexturePerRow } = useAtlasing();
+const { useAtlasing } = metaversefile
+const { calculateCanvasAtlasTexturePerRow } = useAtlasing()
 
 const _createTerrainMaterial = () => {
   const materialUniforms = {
@@ -17,24 +17,22 @@ const _createTerrainMaterial = () => {
     uMetalnessMap: {},
     uAoMap: {},
 
-    uTextureScales: { value: MATERIALS_INFO.map((m) => m.scale) },
+    uTextureScales: { value: MATERIALS_INFO.map(m => m.scale) },
 
     // noise texture
-    uNoiseTexture: {},
-  };
+    uNoiseTexture: {}
+  }
 
-  const texturePerRow = calculateCanvasAtlasTexturePerRow(
-    NUM_TERRAIN_MATERIALS
-  );
+  const texturePerRow = calculateCanvasAtlasTexturePerRow(NUM_TERRAIN_MATERIALS)
 
   const material = new THREE.MeshStandardMaterial({
     // roughness: 0.95,
     // metalness: 0.1,
     // envMap: new THREE.Texture(),
     // envMapIntensity: 1,
-    onBeforeCompile: (shader) => {
+    onBeforeCompile: shader => {
       for (const k in materialUniforms) {
-        shader.uniforms[k] = materialUniforms[k];
+        shader.uniforms[k] = materialUniforms[k]
       }
 
       // ? by installing glsl-literal extension in vscode you can get syntax highlighting for glsl
@@ -52,7 +50,7 @@ const _createTerrainMaterial = () => {
         varying vec3 vPosition;
         varying vec3 vCameraDepth;
         varying vec3 vObjectNormal;
-      `;
+      `
 
       const worldPosVertex = /* glsl */ `
        #include <worldpos_vertex>
@@ -64,7 +62,7 @@ const _createTerrainMaterial = () => {
        vNormalMatrix = normalMatrix;
        vObjectNormal = normal;
        vCameraDepth = -(modelViewMatrix * vec4(transformed, 1.)).xyz;
-      `;
+      `
 
       // fragment shader
       const mapParseFragment = /* glsl */ `
@@ -183,7 +181,7 @@ const _createTerrainMaterial = () => {
           vec4 textureColor = blendMaterials(inputTextures, textureUv);
           return textureColor;
         }
-      `;
+      `
 
       const mapFragment = /* glsl */ `
         #include <map_fragment>
@@ -191,14 +189,14 @@ const _createTerrainMaterial = () => {
         vec4 diffMapColor = mapTextures(vPosition, vObjectNormal, uDiffMap);
         diffMapColor.rgb = ACESFilmicToneMapping(diffMapColor.rgb);
         diffuseColor *= diffMapColor;
-      `;
+      `
 
       const normalFragmentMaps = /* glsl */ `
         #include <normal_fragment_maps>
 
         vec3 normalMapColor = mapTextures(vPosition, vObjectNormal, uNormalMap).xyz;
         normal = normalize(vNormalMatrix * normalMapColor); 
-      `;
+      `
 
       // * The maps below are disabled for now
       const roughnessMapFragment = /* glsl */ `
@@ -206,13 +204,13 @@ const _createTerrainMaterial = () => {
 
         // vec4 texelRoughness = mapTextures(vPosition, vObjectNormal, uRoughnessMap);
         // roughnessFactor *= texelRoughness.g;
-      `;
+      `
       const metalnessMapFragment = /* glsl */ `
         #include <metalnessmap_fragment>
 
         // vec4 texelMetalness = mapTextures(vPosition, vObjectNormal, uMetalnessMap);
         // metalnessFactor *= texelMetalness.g;
-      `;
+      `
 
       const aoMapFragment = /* glsl */ `
         #include <aomap_fragment>
@@ -226,57 +224,57 @@ const _createTerrainMaterial = () => {
         //   float dotNV = saturate( dot( geometry.normal, geometry.viewDir ) );
         //   reflectedLight.indirectSpecular *= computeSpecularOcclusion( dotNV, ambientOcclusion, material.roughness );
         // #endif
-      `;
+      `
 
       // extend shaders
       shader.vertexShader = shader.vertexShader.replace(
-        "#include <uv_pars_vertex>",
+        '#include <uv_pars_vertex>',
         uvParseVertex
-      );
+      )
 
       shader.vertexShader = shader.vertexShader.replace(
-        "#include <worldpos_vertex>",
+        '#include <worldpos_vertex>',
         worldPosVertex
-      );
+      )
 
       shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <map_pars_fragment>",
+        '#include <map_pars_fragment>',
         mapParseFragment
-      );
+      )
 
       shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <roughnessmap_fragment>",
+        '#include <roughnessmap_fragment>',
         roughnessMapFragment
-      );
+      )
 
       shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <metalnessmap_fragment>",
+        '#include <metalnessmap_fragment>',
         metalnessMapFragment
-      );
+      )
       shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <map_fragment>",
+        '#include <map_fragment>',
         mapFragment
-      );
+      )
 
       shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <normal_fragment_maps>",
+        '#include <normal_fragment_maps>',
         normalFragmentMaps
-      );
+      )
 
       shader.fragmentShader = shader.fragmentShader.replace(
-        "#include <aomap_fragment>",
+        '#include <aomap_fragment>',
         aoMapFragment
-      );
+      )
 
-      return shader;
-    },
-  });
+      return shader
+    }
+  })
 
-  material.uniforms = materialUniforms;
+  material.uniforms = materialUniforms
 
-  _disableOutgoingLights(material);
+  _disableOutgoingLights(material)
 
-  return material;
-};
+  return material
+}
 
-export default _createTerrainMaterial;
+export default _createTerrainMaterial
