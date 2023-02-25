@@ -1,6 +1,6 @@
 import metaversefile from "metaversefile";
 import * as THREE from "three";
-import {GRASS_COLORS_SHADER_CODE} from "../assets.js";
+import { GRASS_COLORS_SHADER_CODE } from "../assets.js";
 import {
   GET_COLOR_PARAMETER_NAME,
   maxAnisotropy,
@@ -11,7 +11,10 @@ import {
   // bufferSize,
   WORLD_BASE_HEIGHT,
 } from "../constants.js";
-import {_disableOutgoingLights, _patchOnBeforeCompileFunction} from "../utils/utils.js";
+import {
+  _disableOutgoingLights,
+  _patchOnBeforeCompileFunction,
+} from "../utils/utils.js";
 const {
   useCamera,
   useProcGenManager,
@@ -24,10 +27,10 @@ const {
   useSpriting,
 } = metaversefile;
 const procGenManager = useProcGenManager();
-const {createTextureAtlas} = useAtlasing();
-const {InstancedBatchedMesh, InstancedGeometryAllocator} =
+const { createTextureAtlas } = useAtlasing();
+const { InstancedBatchedMesh, InstancedGeometryAllocator } =
   useGeometryBatching();
-const {gltfLoader} = useLoaders();
+const { gltfLoader } = useLoaders();
 
 //
 
@@ -57,7 +60,10 @@ const _collectTextures = (drawCall, instanceAttributes) => {
   const textures = Array(instanceAttributes.length);
   for (let i = 0; i < instanceAttributes.length; i++) {
     const instanceAttribute = instanceAttributes[i];
-    const textureProps = new TextureProps(drawCall.getTexture(instanceAttribute.name),drawCall.getTextureOffset(instanceAttribute.name));
+    const textureProps = new TextureProps(
+      drawCall.getTexture(instanceAttribute.name),
+      drawCall.getTextureOffset(instanceAttribute.name)
+    );
     textures[i] = textureProps;
   }
   return textures;
@@ -66,7 +72,7 @@ const _renderPolygonGeometry = (
   drawCall,
   attributes,
   positionIndex,
-  instanceAttributes,
+  instanceAttributes
 ) => {
   const numVerts = attributes[positionIndex].length;
   const step = instanceAttributes[positionIndex].itemSize;
@@ -82,7 +88,7 @@ const _renderPolygonGeometry = (
         textures[i].texture,
         textures[i].offset,
         index,
-        instanceAttribute.itemSize,
+        instanceAttribute.itemSize
       );
     }
 
@@ -91,16 +97,20 @@ const _renderPolygonGeometry = (
 
   for (let i = 0; i < instanceAttributes.length; i++) {
     const instanceAttribute = instanceAttributes[i];
-    drawCall.updateTexture(instanceAttribute.name, textures[i].offset, index * 4);
+    drawCall.updateTexture(
+      instanceAttribute.name,
+      textures[i].offset,
+      index * 4
+    );
   }
 };
 
 const _storeShader = (material, shader) => {
   // storing the shader so we can access it later
   material.userData.shader = shader;
-}
+};
 
-const _addDepthPackingShaderCode = shader => {
+const _addDepthPackingShaderCode = (shader) => {
   return /* glsl */ `#define DEPTH_PACKING 3201` + "\n" + shader;
 };
 
@@ -111,30 +121,30 @@ const _setupPolygonMeshShaderCode = (
     customBeginVertex,
     customUvParsFragment,
     customColorFragment,
-  },
+  }
 ) => {
   shader.vertexShader = shader.vertexShader.replace(
     `#include <uv_pars_vertex>`,
-    customUvParsVertex,
+    customUvParsVertex
   );
   shader.vertexShader = shader.vertexShader.replace(
     `#include <begin_vertex>`,
-    customBeginVertex,
+    customBeginVertex
   );
   shader.fragmentShader = shader.fragmentShader.replace(
     `#include <uv_pars_fragment>`,
-    customUvParsFragment,
+    customUvParsFragment
   );
   shader.fragmentShader = shader.fragmentShader.replace(
     `#include <alphamap_fragment>`,
-    customColorFragment,
+    customColorFragment
   );
 };
 
 const _setupTextureAttributes = (
   shader,
   instanceAttributes,
-  attributeTextures,
+  attributeTextures
 ) => {
   for (let i = 0; i < instanceAttributes.length; i++) {
     const instanceAttribute = instanceAttributes[i];
@@ -152,20 +162,20 @@ export class PolygonPackage {
   }
 
   static async loadUrls(urls, meshLodSpecs, physics) {
-    const _loadModel = u =>
+    const _loadModel = (u) =>
       new Promise((accept, reject) => {
         gltfLoader.load(
           u,
-          o => {
+          (o) => {
             accept(o.scene);
           },
           function onProgress() {},
-          reject,
+          reject
         );
       });
-    const _getMesh = model => {
+    const _getMesh = (model) => {
       let mesh = null;
-      const _recurse = o => {
+      const _recurse = (o) => {
         if (o.isMesh) {
           mesh = o;
           return false;
@@ -184,7 +194,7 @@ export class PolygonPackage {
     const _generateLodMesh = (() => {
       const promiseCache = new Map();
       return (mesh, meshLodSpec) => {
-        const {targetRatio, targetError} = meshLodSpec;
+        const { targetRatio, targetError } = meshLodSpec;
         let promiseMap = promiseCache.get(mesh);
         if (!promiseMap) {
           promiseMap = new Map();
@@ -200,7 +210,7 @@ export class PolygonPackage {
               const lodMesh = await physics.meshoptSimplify(
                 mesh,
                 targetRatio,
-                targetError,
+                targetError
               );
               return lodMesh;
             }
@@ -210,14 +220,14 @@ export class PolygonPackage {
         return promise;
       };
     })();
-    const _generateLodMeshes = async mesh => {
+    const _generateLodMeshes = async (mesh) => {
       const meshLodSpecKeys = Object.keys(meshLodSpecs).map(Number);
       const lodMeshes = await Promise.all(
-        meshLodSpecKeys.map(async lod => {
+        meshLodSpecKeys.map(async (lod) => {
           const meshLodSpec = meshLodSpecs[lod];
           const lodMesh = await _generateLodMesh(mesh, meshLodSpec);
           return lodMesh;
-        }),
+        })
       );
       return lodMeshes;
     };
@@ -228,7 +238,7 @@ export class PolygonPackage {
       textures: ["map", "normalMap"],
       attributes: ["position", "normal", "uv"],
     });
-    const {meshes: atlasMeshes, textureNames} = textureAtlasResult;
+    const { meshes: atlasMeshes, textureNames } = textureAtlasResult;
     const lodMeshes = await Promise.all(atlasMeshes.map(_generateLodMeshes));
 
     const pkg = new PolygonPackage(lodMeshes, textureNames);
@@ -277,7 +287,7 @@ export class PolygonMesh extends InstancedBatchedMesh {
       maxDrawCallsPerGeometry,
       boundingType: "box",
     });
-    const {textures: attributeTextures} = allocator;
+    const { textures: attributeTextures } = allocator;
     for (const k in attributeTextures) {
       const texture = attributeTextures[k];
       texture.anisotropy = maxAnisotropy;
@@ -286,7 +296,7 @@ export class PolygonMesh extends InstancedBatchedMesh {
     let geometry;
 
     // custom shaders
-    const _setupUniforms = shader => {
+    const _setupUniforms = (shader) => {
       _setupTextureAttributes(shader, instanceAttributes, attributeTextures);
     };
 
@@ -346,7 +356,7 @@ export class PolygonMesh extends InstancedBatchedMesh {
       side: THREE.DoubleSide,
       transparent: true,
       alphaTest: 0.1,
-      onBeforeCompile: shader => {
+      onBeforeCompile: (shader) => {
         _setupUniforms(shader);
         _setupPolygonMeshShaderCode(shader, {
           customUvParsVertex,
@@ -364,7 +374,7 @@ export class PolygonMesh extends InstancedBatchedMesh {
       depthPacking: THREE.RGBADepthPacking,
       alphaTest: 0.5,
     });
-    customDepthMaterial.onBeforeCompile = shader => {
+    customDepthMaterial.onBeforeCompile = (shader) => {
       _setupUniforms(shader);
       _setupPolygonMeshShaderCode(shader, {
         customUvParsVertex: _addDepthPackingShaderCode(customUvParsVertex),
@@ -378,7 +388,7 @@ export class PolygonMesh extends InstancedBatchedMesh {
       depthPacking: THREE.RGBADepthPacking,
       alphaTest: 0.5,
     });
-    customDistanceMaterial.onBeforeCompile = shader => {
+    customDistanceMaterial.onBeforeCompile = (shader) => {
       _setupUniforms(shader);
       _setupPolygonMeshShaderCode(shader, {
         customUvParsVertex: _addDepthPackingShaderCode(customUvParsVertex),
@@ -395,7 +405,7 @@ export class PolygonMesh extends InstancedBatchedMesh {
 
     this.instanceAttributes = instanceAttributes;
     this.positionIndex = this.instanceAttributes.findIndex(
-      instanceAttribute => instanceAttribute.name === "p",
+      (instanceAttribute) => instanceAttribute.name === "p"
     );
 
     if (shadow) {
@@ -416,23 +426,23 @@ export class PolygonMesh extends InstancedBatchedMesh {
     if (chunkResult) {
       const instances = chunkResult;
       if (chunk.lod < this.lodCutoff && instances.length > 0) {
-        const {chunkSize} = this.instance;
+        const { chunkSize } = this.instance;
         const boundingBox = localBox.set(
           localVector.set(
             chunk.min.x * chunkSize,
             -WORLD_BASE_HEIGHT + MIN_WORLD_HEIGHT,
-            chunk.min.y * chunkSize,
+            chunk.min.y * chunkSize
           ),
           localVector2.set(
             (chunk.min.x + chunk.lod) * chunkSize,
             -WORLD_BASE_HEIGHT + MAX_WORLD_HEIGHT,
-            (chunk.min.y + chunk.lod) * chunkSize,
-          ),
+            (chunk.min.y + chunk.lod) * chunkSize
+          )
         );
         const lodIndex = Math.log2(chunk.lod);
         const drawChunks = Array(instances.length);
         for (let i = 0; i < instances.length; i++) {
-          const {instanceId, ps, qs, scales, colors} = instances[i];
+          const { instanceId, ps, qs, scales, colors } = instances[i];
           const geometryIndex = instanceId;
           const numInstances = ps.length / 3;
 
@@ -440,11 +450,16 @@ export class PolygonMesh extends InstancedBatchedMesh {
             geometryIndex,
             lodIndex,
             numInstances,
-            boundingBox,
+            boundingBox
           );
           const attributes = [ps, qs, scales, colors];
 
-          _renderPolygonGeometry(drawChunk, attributes, this.positionIndex, this.instanceAttributes);
+          _renderPolygonGeometry(
+            drawChunk,
+            attributes,
+            this.positionIndex,
+            this.instanceAttributes
+          );
           drawChunks[i] = drawChunk;
         }
         const key = procGenManager.getNodeHash(chunk);
@@ -473,13 +488,13 @@ export class PolygonMesh extends InstancedBatchedMesh {
 
   setPackage(pkg) {
     // console.log('set package', pkg);
-    const {lodMeshes, textureNames} = pkg;
+    const { lodMeshes, textureNames } = pkg;
     this.allocator.setGeometries(
-      lodMeshes.map(lodMeshesArray => {
-        return lodMeshesArray.map(lodMesh => {
+      lodMeshes.map((lodMeshesArray) => {
+        return lodMeshesArray.map((lodMesh) => {
           return lodMesh.geometry;
         });
-      }),
+      })
     );
     this.geometry = this.allocator.geometry;
 
@@ -546,7 +561,7 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
       maxDrawCallsPerGeometry,
       boundingType: "box",
     });
-    const {textures: attributeTextures} = allocator;
+    const { textures: attributeTextures } = allocator;
     for (const k in attributeTextures) {
       const texture = attributeTextures[k];
       texture.anisotropy = maxAnisotropy;
@@ -555,7 +570,7 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
     let geometry;
 
     // custom shaders
-    const _setupUniforms = shader => {
+    const _setupUniforms = (shader) => {
       _setupTextureAttributes(shader, instanceAttributes, attributeTextures);
       shader.uniforms.uGrassBladeHeight = {
         value: null,
@@ -708,7 +723,7 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
       transparent: true,
       depthWrite: false,
       // alphaTest: 0.01,
-      onBeforeCompile: shader => {
+      onBeforeCompile: (shader) => {
         _storeShader(material, shader);
         _setupUniforms(shader);
         _setupPolygonMeshShaderCode(shader, {
@@ -717,7 +732,6 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
           customUvParsFragment,
           customColorFragment,
         });
-
 
         return shader;
       },
@@ -729,7 +743,7 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
       depthPacking: THREE.RGBADepthPacking,
       alphaTest: 0.5,
     });
-    customDepthMaterial.onBeforeCompile = shader => {
+    customDepthMaterial.onBeforeCompile = (shader) => {
       _setupUniforms(shader);
       _setupPolygonMeshShaderCode(shader, {
         customUvParsVertex: _addDepthPackingShaderCode(customUvParsVertex),
@@ -743,7 +757,7 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
       depthPacking: THREE.RGBADepthPacking,
       alphaTest: 0.5,
     });
-    customDistanceMaterial.onBeforeCompile = shader => {
+    customDistanceMaterial.onBeforeCompile = (shader) => {
       _setupUniforms(shader);
       _setupPolygonMeshShaderCode(shader, {
         customUvParsVertex: _addDepthPackingShaderCode(customUvParsVertex),
@@ -758,7 +772,7 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
 
     this.instanceAttributes = instanceAttributes;
     this.positionIndex = this.instanceAttributes.findIndex(
-      instanceAttribute => instanceAttribute.name === "p",
+      (instanceAttribute) => instanceAttribute.name === "p"
     );
 
     this.shadow = shadow;
@@ -783,24 +797,32 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
   addChunk(chunk, instances) {
     if (instances) {
       if (chunk.lod < this.lodCutoff && instances.length > 0) {
-        const {chunkSize} = this.instance;
+        const { chunkSize } = this.instance;
         const boundingBox = localBox.set(
           localVector.set(
             chunk.min.x * chunkSize,
             -WORLD_BASE_HEIGHT + MIN_WORLD_HEIGHT,
-            chunk.min.y * chunkSize,
+            chunk.min.y * chunkSize
           ),
           localVector2.set(
             (chunk.min.x + chunk.lod) * chunkSize,
             -WORLD_BASE_HEIGHT + MAX_WORLD_HEIGHT,
-            (chunk.min.y + chunk.lod) * chunkSize,
-          ),
+            (chunk.min.y + chunk.lod) * chunkSize
+          )
         );
         const lodIndex = Math.log2(chunk.lod);
         const drawChunks = Array(instances.length);
         for (let i = 0; i < instances.length; i++) {
-          const {instanceId, ps, qs, scales, colors, materials, materialsWeights, grassProps} =
-            instances[i];
+          const {
+            instanceId,
+            ps,
+            qs,
+            scales,
+            colors,
+            materials,
+            materialsWeights,
+            grassProps,
+          } = instances[i];
           const geometryIndex = instanceId;
           const numInstances = ps.length / 3;
 
@@ -808,9 +830,17 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
             geometryIndex,
             lodIndex,
             numInstances,
-            boundingBox,
+            boundingBox
           );
-          const attributes = [ps, qs, scales, colors, materials, materialsWeights, grassProps];
+          const attributes = [
+            ps,
+            qs,
+            scales,
+            colors,
+            materials,
+            materialsWeights,
+            grassProps,
+          ];
           _renderPolygonGeometry(
             drawChunk,
             attributes,
@@ -845,13 +875,13 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
 
   update(timestamp) {
     const shader = this.material.userData.shader;
-    if(shader) {
+    if (shader) {
       shader.uniforms.uTime.value = timestamp / 1000;
     }
   }
 
   setPackage(pkg) {
-    const {lodMeshes, textureNames} = pkg;
+    const { lodMeshes, textureNames } = pkg;
 
     const LOD0Mesh = lodMeshes[0][0];
     localBox.setFromObject(LOD0Mesh);
@@ -859,11 +889,11 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
     const LOD0MeshHeight = localBox.getSize(localVector).y;
 
     this.allocator.setGeometries(
-      lodMeshes.map(lodMeshesArray => {
-        return lodMeshesArray.map(lodMesh => {
+      lodMeshes.map((lodMeshesArray) => {
+        return lodMeshesArray.map((lodMesh) => {
           return lodMesh.geometry;
         });
-      }),
+      })
     );
     this.geometry = this.allocator.geometry;
 
@@ -871,8 +901,8 @@ export class GrassPolygonMesh extends InstancedBatchedMesh {
       this.material[textureName] = lodMeshes[0][0].material[textureName];
     }
 
-    const setUniforms = shader => {
-      shader.uniforms.uGrassBladeHeight = {value: LOD0MeshHeight};
+    const setUniforms = (shader) => {
+      shader.uniforms.uGrassBladeHeight = { value: LOD0MeshHeight };
     };
 
     _patchOnBeforeCompileFunction(this.material, setUniforms);

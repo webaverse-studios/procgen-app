@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import metaversefile from "metaversefile";
-const {useLoaders, useAtlasing} = metaversefile;
+const { useLoaders, useAtlasing } = metaversefile;
 
 const loaders = useLoaders();
-const {exrLoader} = loaders;
+const { exrLoader } = loaders;
 
-const {CanvasTextureAtlas} = useAtlasing();
+const { CanvasTextureAtlas } = useAtlasing();
 
 const textureLoader = new THREE.TextureLoader();
 
@@ -16,40 +16,40 @@ export const NORMAL_MAP = "normal-map";
 export const NOISE_MAP = "simplex-noise";
 export const ENV_MAP = "environment-lighting";
 
-const _textureError = err => {
+const _textureError = (err) => {
   console.error("Terrain Package : Loading texture failed : ", err);
 };
-const _exrError = err => {
+const _exrError = (err) => {
   console.error("Terrain Package : Loading exr failed : ", err);
 };
 
-const _loadTexture = u =>
+const _loadTexture = (u) =>
   new Promise((accept, reject) => {
     // TODO : use ktx2 loader instead
     textureLoader.load(
       u,
-      t => {
+      (t) => {
         accept(t);
       },
       function onProgress() {},
-      _textureError,
+      _textureError
     );
   });
 
-const _loadExr = u =>
+const _loadExr = (u) =>
   new Promise((accept, reject) => {
     exrLoader.load(
       u,
-      t => {
+      (t) => {
         accept(t);
       },
       function onProgress() {},
-      _exrError,
+      _exrError
     );
   });
 
-const _bakeTerrainTextures = options => {
-  const {diffuseMapArray, normalMapArray, noiseTexture, evnMapTexture} =
+const _bakeTerrainTextures = (options) => {
+  const { diffuseMapArray, normalMapArray, noiseTexture, evnMapTexture } =
     options;
 
   const textures = {};
@@ -57,12 +57,12 @@ const _bakeTerrainTextures = options => {
   const diffuseAtlas = new CanvasTextureAtlas(
     diffuseMapArray,
     SUB_TEXTURE_SIZE,
-    THREE.sRGBEncoding,
+    THREE.sRGBEncoding
   );
   const normalAtlas = new CanvasTextureAtlas(
     normalMapArray,
     SUB_TEXTURE_SIZE,
-    THREE.LinearEncoding,
+    THREE.LinearEncoding
   );
 
   noiseTexture.wrapS = noiseTexture.wrapT = THREE.RepeatWrapping;
@@ -81,7 +81,7 @@ class TerrainPackage {
   }
 
   static async loadUrls(paths) {
-    const {diffNames, normalNames, envName, noiseName} = paths;
+    const { diffNames, normalNames, envName, noiseName } = paths;
 
     // * loading
     const assetsArray = [

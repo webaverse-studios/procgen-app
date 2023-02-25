@@ -1,10 +1,10 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 const textureLoader = new THREE.TextureLoader();
 const cubeMaploader = new THREE.CubeTextureLoader();
 
 const _textureError = (err) => {
-  console.error('Liquid Package : Loading texture failed : ', err);
+  console.error("Liquid Package : Loading texture failed : ", err);
 };
 
 const _loadTexture = (u) =>
@@ -19,27 +19,26 @@ const _loadTexture = (u) =>
     );
   });
 
-
 class LiquidPackage {
   constructor(textures) {
     this.textures = textures;
   }
 
   static async loadUrls(paths) {
-    const {shaderTexturePath, cubeMapPath} = paths;
+    const { shaderTexturePath, cubeMapPath } = paths;
 
     const mapObjectToArray = (obj) => {
       const res = [];
-      for (const key in obj)
-        res.push({key: key, value: obj[key]});
+      for (const key in obj) res.push({ key: key, value: obj[key] });
       return res;
-    }
+    };
 
     const shaderTextureArray = mapObjectToArray(shaderTexturePath);
-    const shaderTextures = await Promise.all(shaderTextureArray.map(_loadTexture))
-    .then(function(arr) {
+    const shaderTextures = await Promise.all(
+      shaderTextureArray.map(_loadTexture)
+    ).then(function (arr) {
       const obj = {};
-      for (let i = 0; i < shaderTextureArray.length; i ++) {
+      for (let i = 0; i < shaderTextureArray.length; i++) {
         obj[shaderTextureArray[i].key] = arr[i];
         if (shaderTextureArray[i].value[1]) {
           arr[i].wrapS = arr[i].wrapT = THREE.RepeatWrapping;
@@ -48,13 +47,19 @@ class LiquidPackage {
       return obj;
     });
 
-    
     cubeMaploader.setPath(cubeMapPath);
-    const textureCube = cubeMaploader.load(['px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png']);
+    const textureCube = cubeMaploader.load([
+      "px.png",
+      "nx.png",
+      "py.png",
+      "ny.png",
+      "pz.png",
+      "nz.png",
+    ]);
 
     const textures = {};
-    textures['shaderTextures'] = shaderTextures;
-    textures['textureCube'] = textureCube;
+    textures["shaderTextures"] = shaderTextures;
+    textures["textureCube"] = textureCube;
     // * Create new package
     const pkg = new LiquidPackage(textures);
     return pkg;

@@ -1,4 +1,4 @@
-export const oceanShader =  /* glsl */`
+export const oceanShader = /* glsl */ `
 	if (!cameraInWater) {
 		//################################## compute waterColor ##################################
 		float opDepthScale = 15.;

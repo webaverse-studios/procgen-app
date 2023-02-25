@@ -1,0 +1,28 @@
+{
+  "license": "MIT",
+  "version": "0.0.1",
+  "name": "@webaverse-studios/procgen-app",
+  "description": "",
+  "homepage": "https://github.com/webaverse-studios/procgen-app#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webaverse-studios/procgen-app"
+  },
+  "bugs": {
+    "url": "https://github.com/webaverse-studios/procgen-app/issues"
+  },
+  "main": "./index.js",
+  "module": "./index.js",
+  "scripts": {
+    "lint": "eslint './**/*.{js,ts}'",
+    "lint:fix": "eslint --fix './**/*.{js,ts}'",
+    "format": "prettier --write ./**/*.{js,ts}"
+  },
+  "devDependencies": {
+    "@webaverse-studios/eslint-config": "^1.0.0",
+    "eslint": "^8.34.0",
+    "eslint-plugin-jsdoc": "latest",
+    "eslint-plugin-promise": "latest",
+    "prettier": "^2.8.4"
+  }
+}

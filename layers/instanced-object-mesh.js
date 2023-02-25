@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import {PolygonMesh, PolygonPackage} from "../meshes/polygon-mesh.js";
+import { PolygonMesh, PolygonPackage } from "../meshes/polygon-mesh.js";
 import {
   SpritesheetMesh,
   SpritesheetPackage,
@@ -35,7 +35,7 @@ const maxDrawCallsPerGeometry = 256;
 //
 
 export class InstancedObjectMesh extends THREE.Object3D {
-  constructor({instance, physics, urls, shadow}) {
+  constructor({ instance, physics, urls, shadow }) {
     super();
 
     this.urls = urls;
@@ -84,7 +84,7 @@ export class InstancedObjectMesh extends THREE.Object3D {
 }
 
 export class InstancedObjectGroup extends THREE.Object3D {
-  constructor({instance, urls, physics, shadow}) {
+  constructor({ instance, urls, physics, shadow }) {
     super();
 
     this.urls = urls;
@@ -115,7 +115,7 @@ export class InstancedObjectGroup extends THREE.Object3D {
       for (let i = 0; i < this.meshes.length; i++) {
         const mesh = this.meshes[i];
         const chunkResult = chunkResults[i];
-        if(chunkResult) {
+        if (chunkResult) {
           const chunkResultInstances = chunkResult.instances;
           mesh.addChunk(chunk, chunkResultInstances);
         }
@@ -134,7 +134,7 @@ export class InstancedObjectGroup extends THREE.Object3D {
     await Promise.all(
       this.meshes.map((mesh, i) => {
         mesh.waitForLoad();
-      }),
+      })
     );
   }
 }

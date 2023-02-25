@@ -1,6 +1,6 @@
-import metaversefile from 'metaversefile';
-import * as THREE from 'three';
-const {useLocalPlayer} = metaversefile;
+import metaversefile from "metaversefile";
+import * as THREE from "three";
+const { useLocalPlayer } = metaversefile;
 
 const INITIAL_TEXTURE_MATRIX = new THREE.Matrix4();
 INITIAL_TEXTURE_MATRIX.set(
@@ -35,7 +35,7 @@ class WaterRenderer {
       window.innerWidth * pixelRatio,
       window.innerHeight * pixelRatio
     );
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       const pr = this.renderer.getPixelRatio();
       this.depthRenderTarget.setSize(
         window.innerWidth * pr,
@@ -184,7 +184,7 @@ class WaterRenderer {
       this.reflectorPlane.normal.x,
       this.reflectorPlane.normal.y,
       this.reflectorPlane.normal.z,
-      this.reflectorPlane.constant,
+      this.reflectorPlane.constant
     );
 
     const projectionMatrix = this.reflectionVirtualCamera.projectionMatrix;
@@ -273,7 +273,7 @@ class WaterRenderer {
     this.water.matrixWorld.decompose(
       this.refractP,
       this.refractQ,
-      this.refractS,
+      this.refractS
     );
     this.normal.set(0, -1, 0).applyQuaternion(this.refractQ).normalize();
 
@@ -282,7 +282,7 @@ class WaterRenderer {
 
     this.refractorPlane.setFromNormalAndCoplanarPoint(
       this.normal,
-      this.refractP,
+      this.refractP
     );
 
     this.textureMatrix.copy(INITIAL_TEXTURE_MATRIX);
@@ -310,7 +310,7 @@ class WaterRenderer {
       this.refractionClipPlane.normal.x,
       this.refractionClipPlane.normal.y,
       this.refractionClipPlane.normal.z,
-      this.refractionClipPlane.constant,
+      this.refractionClipPlane.constant
     );
 
     // calculate the clip-space corner point opposite the clipping plane and

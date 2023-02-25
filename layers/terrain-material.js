@@ -1,12 +1,12 @@
 import metaversefile from "metaversefile";
 import * as THREE from "three";
 
-import {MATERIALS_INFO} from "../assets.js";
-import {_disableOutgoingLights} from "../utils/utils.js";
-import {NUM_TERRAIN_MATERIALS} from "./terrain-mesh.js";
+import { MATERIALS_INFO } from "../assets.js";
+import { _disableOutgoingLights } from "../utils/utils.js";
+import { NUM_TERRAIN_MATERIALS } from "./terrain-mesh.js";
 
-const {useAtlasing} = metaversefile;
-const {calculateCanvasAtlasTexturePerRow} = useAtlasing();
+const { useAtlasing } = metaversefile;
+const { calculateCanvasAtlasTexturePerRow } = useAtlasing();
 
 const _createTerrainMaterial = () => {
   const materialUniforms = {
@@ -17,14 +17,14 @@ const _createTerrainMaterial = () => {
     uMetalnessMap: {},
     uAoMap: {},
 
-    uTextureScales: {value: MATERIALS_INFO.map(m => m.scale)},
+    uTextureScales: { value: MATERIALS_INFO.map((m) => m.scale) },
 
     // noise texture
     uNoiseTexture: {},
   };
 
   const texturePerRow = calculateCanvasAtlasTexturePerRow(
-    NUM_TERRAIN_MATERIALS,
+    NUM_TERRAIN_MATERIALS
   );
 
   const material = new THREE.MeshStandardMaterial({
@@ -32,7 +32,7 @@ const _createTerrainMaterial = () => {
     // metalness: 0.1,
     // envMap: new THREE.Texture(),
     // envMapIntensity: 1,
-    onBeforeCompile: shader => {
+    onBeforeCompile: (shader) => {
       for (const k in materialUniforms) {
         shader.uniforms[k] = materialUniforms[k];
       }
@@ -231,41 +231,41 @@ const _createTerrainMaterial = () => {
       // extend shaders
       shader.vertexShader = shader.vertexShader.replace(
         "#include <uv_pars_vertex>",
-        uvParseVertex,
+        uvParseVertex
       );
 
       shader.vertexShader = shader.vertexShader.replace(
         "#include <worldpos_vertex>",
-        worldPosVertex,
+        worldPosVertex
       );
 
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <map_pars_fragment>",
-        mapParseFragment,
+        mapParseFragment
       );
 
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <roughnessmap_fragment>",
-        roughnessMapFragment,
+        roughnessMapFragment
       );
 
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <metalnessmap_fragment>",
-        metalnessMapFragment,
+        metalnessMapFragment
       );
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <map_fragment>",
-        mapFragment,
+        mapFragment
       );
 
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <normal_fragment_maps>",
-        normalFragmentMaps,
+        normalFragmentMaps
       );
 
       shader.fragmentShader = shader.fragmentShader.replace(
         "#include <aomap_fragment>",
-        aoMapFragment,
+        aoMapFragment
       );
 
       return shader;

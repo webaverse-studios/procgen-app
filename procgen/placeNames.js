@@ -426,5 +426,5 @@ Nectar Lush
 The Nest
 Seraphim Dust
 The Stacks
-The Heap`.split('\n');
+The Heap`.split("\n");
 export default placeNames;

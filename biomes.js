@@ -58,12 +58,12 @@ class Path {
 }
 
 export const _createDataRecursively = (name, obj) => {
-  if(typeof obj === "string") {
+  if (typeof obj === "string") {
     // we've reached the end of the recursive loop
     return new Path(name, obj);
   }
 
-  const data = {name: name, types: []};
+  const data = { name: name, types: [] };
 
   for (const [key, value] of Object.entries(obj)) {
     const info = _createDataRecursively(key, value);

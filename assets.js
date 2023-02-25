@@ -3,21 +3,23 @@ import {
   GET_COLOR_PARAMETER_NAME,
   GRASS_COLOR_ABOVE_DIRT,
   GRASS_COLOR_ABOVE_GRASS,
-  GRASS_COLOR_NAME
+  GRASS_COLOR_NAME,
 } from "./constants.js";
 
 const USE_LOCAL_ASSETS = false;
 
-export const procgenAssetsBaseUrl = USE_LOCAL_ASSETS ? 'https://local.webaverse.com/scenes/heightfield/procgen-assets/' : 'https://webaverse.github.io/procgen-assets/';
+export const procgenAssetsBaseUrl = USE_LOCAL_ASSETS
+  ? "https://local.webaverse.com/scenes/heightfield/procgen-assets/"
+  : "https://webaverse.github.io/procgen-assets/";
 
 // Directories Names
-const TERRAIN_TEXTURES_DIRECTORY_NAME = 'terrain/textures/';
-const TREE_MODELS_DIRECTORY_NAME = 'vegetation/jungle-trees/';
-const FLOWER_MODELS_DIRECTORY_NAME = 'vegetation/flowers/';
-const BUSH_MODELS_DIRECTORY_NAME = 'vegetation/bushes/';
-const ROCK_MODELS_DIRECTORY_NAME = 'rocks/';
-const ORE_MODELS_DIRECTORY_NAME = 'ores/';
-const GRASS_MODELS_DIRECTORY_NAME = 'grass/';
+const TERRAIN_TEXTURES_DIRECTORY_NAME = "terrain/textures/";
+const TREE_MODELS_DIRECTORY_NAME = "vegetation/jungle-trees/";
+const FLOWER_MODELS_DIRECTORY_NAME = "vegetation/flowers/";
+const BUSH_MODELS_DIRECTORY_NAME = "vegetation/bushes/";
+const ROCK_MODELS_DIRECTORY_NAME = "rocks/";
+const ORE_MODELS_DIRECTORY_NAME = "ores/";
+const GRASS_MODELS_DIRECTORY_NAME = "grass/";
 
 // File Extensions
 const MODEL_FILES_EXTENSION = "glb";
@@ -30,17 +32,17 @@ const TALL_TREE_NAME = "jungle_tree_3_variant_texta";
 const FLOWER_1_NAME = "flowers1";
 const FLOWER_2_NAME = "flowers2";
 const FLOWER_3_NAME = "flowers4";
-const BUSH_NAME = 'bush_1_dream';
-const BIG_ROCK_NAME = 'big_rock_v2';
-const MED_ROCK_NAME = 'med_rock_v2';
-const GRASS_NAME = 'grass_1_dream';
-const ORE_NAME = 'green_biome_ore';
+const BUSH_NAME = "bush_1_dream";
+const BIG_ROCK_NAME = "big_rock_v2";
+const MED_ROCK_NAME = "med_rock_v2";
+const GRASS_NAME = "grass_1_dream";
+const ORE_NAME = "green_biome_ore";
 
 // Texture Files
-const GRASS_MATERIAL_NAME = 'stylized_grass';
-const DIRT_MATERIAL_NAME = 'dirt_ground';
-const ROCK_MATERIAL_NAME = 'stylized_stone';
-const STONE_MATERIAL_NAME = 'stylized_snow';
+const GRASS_MATERIAL_NAME = "stylized_grass";
+const DIRT_MATERIAL_NAME = "dirt_ground";
+const ROCK_MATERIAL_NAME = "stylized_stone";
+const STONE_MATERIAL_NAME = "stylized_snow";
 
 //
 
@@ -86,25 +88,25 @@ export const MATERIALS_INFO = [
     GRASS_MATERIAL_NAME,
     TERRAIN_TEXTURES_DIRECTORY_NAME,
     0.1,
-    GRASS_COLOR_ABOVE_GRASS,
+    GRASS_COLOR_ABOVE_GRASS
   ),
   new MaterialInfo(
     DIRT_MATERIAL_NAME,
     TERRAIN_TEXTURES_DIRECTORY_NAME,
     0.1,
-    GRASS_COLOR_ABOVE_DIRT,
+    GRASS_COLOR_ABOVE_DIRT
   ),
   new MaterialInfo(
     ROCK_MATERIAL_NAME,
     TERRAIN_TEXTURES_DIRECTORY_NAME,
     6,
-    GRASS_COLOR_ABOVE_DIRT,
+    GRASS_COLOR_ABOVE_DIRT
   ),
   new MaterialInfo(
     STONE_MATERIAL_NAME,
     TERRAIN_TEXTURES_DIRECTORY_NAME,
     6,
-    GRASS_COLOR_ABOVE_DIRT,
+    GRASS_COLOR_ABOVE_DIRT
   ),
 ];
 
@@ -130,31 +132,29 @@ export const STONES_INFO = [
 export const GRASSES_INFO = [
   new ModelInfo(GRASS_NAME, GRASS_MODELS_DIRECTORY_NAME),
 ];
-export const ORES_INFO = [
-  new ModelInfo(ORE_NAME, ORE_MODELS_DIRECTORY_NAME),
-];
+export const ORES_INFO = [new ModelInfo(ORE_NAME, ORE_MODELS_DIRECTORY_NAME)];
 
 export const glbUrlSpecs = {
-  trees: TREES_INFO.map(t => t.getModelPath()).map(u => {
+  trees: TREES_INFO.map((t) => t.getModelPath()).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
-  flowers: FLOWERS_INFO.map(t => t.getModelPath()).map(u => {
+  flowers: FLOWERS_INFO.map((t) => t.getModelPath()).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
-  bushes: BUSHES_INFO.map(t => t.getModelPath()).map(u => {
+  bushes: BUSHES_INFO.map((t) => t.getModelPath()).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
-  rocks: ROCKS_INFO.map(t => t.getModelPath()).map(u => {
+  rocks: ROCKS_INFO.map((t) => t.getModelPath()).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
-  stones: STONES_INFO.map(t => t.getModelPath()).map(u => {
+  stones: STONES_INFO.map((t) => t.getModelPath()).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
-  grasses: GRASSES_INFO.map(t => t.getModelPath()).map(u => {
+  grasses: GRASSES_INFO.map((t) => t.getModelPath()).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
 
-  ores: ORES_INFO.map(t => t.getModelPath()).map(u => {
+  ores: ORES_INFO.map((t) => t.getModelPath()).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
 
@@ -193,7 +193,7 @@ export const glbUrlSpecs = {
     "truck.svg",
     "unicorn.svg",
     "water.svg",
-  ].map(u => {
+  ].map((u) => {
     return `${procgenAssetsBaseUrl}icons/${u}`;
   }),
 };
@@ -201,9 +201,18 @@ export const glbUrlSpecs = {
 // liquid
 export const liquidTextureUrlSpecs = {
   shaderTexturePath: {
-    foamTexture: [`${procgenAssetsBaseUrl}water/water-shader/textures/Waves10.png`, true],
-    tDistortion: [`${procgenAssetsBaseUrl}water/water-shader/textures/distortion.png`, true],
-    waterNormalTexture: [`${procgenAssetsBaseUrl}water/water-shader/textures/waterNormal.png`, true],
+    foamTexture: [
+      `${procgenAssetsBaseUrl}water/water-shader/textures/Waves10.png`,
+      true,
+    ],
+    tDistortion: [
+      `${procgenAssetsBaseUrl}water/water-shader/textures/distortion.png`,
+      true,
+    ],
+    waterNormalTexture: [
+      `${procgenAssetsBaseUrl}water/water-shader/textures/waterNormal.png`,
+      true,
+    ],
   },
   cubeMapPath: `${procgenAssetsBaseUrl}water/water-shader/textures/cubeMap/`,
 };
@@ -211,19 +220,19 @@ export const liquidTextureUrlSpecs = {
 export const terrainTextureUrlSpecs = {
   simplexMap: `${procgenAssetsBaseUrl}noise/simplex-noise.png`,
   terrainEnvMap: `${procgenAssetsBaseUrl}terrain/envmaps/env.exr`,
-  terrainDiffuseMaps: MATERIALS_INFO.map(m => {
+  terrainDiffuseMaps: MATERIALS_INFO.map((m) => {
     return m.getDiffusePath();
-  }).map(u => {
+  }).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
-  terrainNormalMaps: MATERIALS_INFO.map(m => {
+  terrainNormalMaps: MATERIALS_INFO.map((m) => {
     return m.getNormalPath();
-  }).map(u => {
+  }).map((u) => {
     return `${procgenAssetsBaseUrl}${u}`;
   }),
 };
 
-const _generateMaterialColorShaderCode = colorName => {
+const _generateMaterialColorShaderCode = (colorName) => {
   const _generateColorCodes = () => {
     let string = ``;
     for (let i = 0; i < MATERIALS_INFO.length; i++) {
@@ -246,4 +255,5 @@ const _generateMaterialColorShaderCode = colorName => {
   return string;
 };
 
-export const GRASS_COLORS_SHADER_CODE = _generateMaterialColorShaderCode(GRASS_COLOR_NAME);
+export const GRASS_COLORS_SHADER_CODE =
+  _generateMaterialColorShaderCode(GRASS_COLOR_NAME);

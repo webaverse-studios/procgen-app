@@ -1,23 +1,23 @@
-import metaversefile from 'metaversefile';
-import * as THREE from 'three';
+import metaversefile from "metaversefile";
+import * as THREE from "three";
 
-import {terrainTextureUrlSpecs} from '../assets.js';
+import { terrainTextureUrlSpecs } from "../assets.js";
 
 import {
   bufferSize,
   MAX_WORLD_HEIGHT,
   MIN_WORLD_HEIGHT,
   WORLD_BASE_HEIGHT,
-} from '../constants.js';
+} from "../constants.js";
 
 import TerrainPackage, {
   DIFFUSE_MAP,
   ENV_MAP,
   NOISE_MAP,
   NORMAL_MAP,
-} from '../meshes/terrain-package.js';
+} from "../meshes/terrain-package.js";
 
-import _createTerrainMaterial from './terrain-material.js';
+import _createTerrainMaterial from "./terrain-material.js";
 
 const DIFFUSE_MAP_PATHS = terrainTextureUrlSpecs.terrainDiffuseMaps;
 const NORMAL_MAP_PATHS = terrainTextureUrlSpecs.terrainNormalMaps;
@@ -48,12 +48,12 @@ export class TerrainMesh extends BufferedMesh {
     const allocator = new GeometryAllocator(
       [
         {
-          name: 'position',
+          name: "position",
           Type: Float32Array,
           itemSize: 3,
         },
         {
-          name: 'normal',
+          name: "normal",
           Type: Float32Array,
           itemSize: 3,
         },
@@ -63,17 +63,17 @@ export class TerrainMesh extends BufferedMesh {
           itemSize: 4,
         }, */
         {
-          name: 'biomesUvs1',
+          name: "biomesUvs1",
           Type: Float32Array,
           itemSize: 4,
         },
         {
-          name: 'materials',
+          name: "materials",
           Type: Int32Array,
           itemSize: 4,
         },
         {
-          name: 'materialsWeights',
+          name: "materialsWeights",
           Type: Float32Array,
           itemSize: 4,
         },
@@ -105,12 +105,12 @@ export class TerrainMesh extends BufferedMesh {
       ],
       {
         bufferSize,
-        boundingType: 'box',
+        boundingType: "box",
         // hasOcclusionCulling: true
       }
     );
 
-    const {geometry} = allocator;
+    const { geometry } = allocator;
 
     const material = _createTerrainMaterial();
 
@@ -149,15 +149,15 @@ export class TerrainMesh extends BufferedMesh {
         geometry,
         geometryBinding
       ) => {
-        const positionOffset = geometryBinding.getAttributeOffset('position');
-        const normalOffset = geometryBinding.getAttributeOffset('normal');
+        const positionOffset = geometryBinding.getAttributeOffset("position");
+        const normalOffset = geometryBinding.getAttributeOffset("normal");
         // let biomesOffset = geometryBinding.getAttributeOffset('biomes');
         // let biomesWeightsOffset = geometryBinding.getAttributeOffset('biomesWeights');
         const biomesUvs1Offset =
-          geometryBinding.getAttributeOffset('biomesUvs1');
-        const materialsOffset = geometryBinding.getAttributeOffset('materials');
+          geometryBinding.getAttributeOffset("biomesUvs1");
+        const materialsOffset = geometryBinding.getAttributeOffset("materials");
         const materialsWeightsOffset =
-          geometryBinding.getAttributeOffset('materialsWeights');
+          geometryBinding.getAttributeOffset("materialsWeights");
         // let biomesUvs2Offset = geometryBinding.getAttributeOffset('biomesUvs2');
         // let seedsOffset = geometryBinding.getAttributeOffset('seed');
         // let skylightsOffset = geometryBinding.getAttributeOffset('skylights');
@@ -315,7 +315,7 @@ export class TerrainMesh extends BufferedMesh {
       const _handlePhysics = async () => {
         const physicsGeo = new THREE.BufferGeometry();
         physicsGeo.setAttribute(
-          'position',
+          "position",
           new THREE.BufferAttribute(terrainGeometry.positions, 3)
         );
         physicsGeo.setIndex(

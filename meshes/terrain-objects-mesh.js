@@ -17,7 +17,7 @@ export class TerrainObjectsMesh extends THREE.Object3D {
         instance,
         physics,
         urls: meshSpecs.urls,
-        shadow: meshSpecs.shadow
+        shadow: meshSpecs.shadow,
       });
       this.add(mesh);
       mesh.updateMatrixWorld();
@@ -29,7 +29,7 @@ export class TerrainObjectsMesh extends THREE.Object3D {
     await Promise.all(
       this.children.map((child, i) => {
         child.waitForLoad();
-      }),
+      })
     );
   }
 

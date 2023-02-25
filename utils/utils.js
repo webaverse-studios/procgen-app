@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import {NO_LIGHT_MATERIAL_SHADOW_INTENSITY} from '../constants.js';
+import * as THREE from "three";
+import { NO_LIGHT_MATERIAL_SHADOW_INTENSITY } from "../constants.js";
 
 export class ENUM {
   constructor(namesArray) {
@@ -23,7 +23,9 @@ export const _addNoLightingShaderChunk = () => {
   const outgoingLightChunkNoLight = /* glsl */ `vec3 outgoingLight = diffuseColor.rgb * (1.0 - ${NO_LIGHT_MATERIAL_SHADOW_INTENSITY} * (1.0 - getShadowMask()));`;
 
   const _replaceOutgoingLightChunk = (materialName) => {
-    THREE.ShaderLib[materialName].fragmentShader = THREE.ShaderLib[materialName].fragmentShader.replace(
+    THREE.ShaderLib[materialName].fragmentShader = THREE.ShaderLib[
+      materialName
+    ].fragmentShader.replace(
       outgoingLightChunk,
       /* glsl */ `
         #ifndef NO_LIGHT
@@ -38,7 +40,6 @@ export const _addNoLightingShaderChunk = () => {
   _replaceOutgoingLightChunk("lambert");
   _replaceOutgoingLightChunk("standard");
 };
-
 
 export const _disableOutgoingLights = (material) => {
   material.lights = false;

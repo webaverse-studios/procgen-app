@@ -1,64 +1,64 @@
-import * as THREE from 'three';
-import {oceanShader} from '../liquid-effect/ocean-shader.js';
-import {riverShader} from '../liquid-effect/river-shader.js';
-import {waterfallShader} from '../liquid-effect/waterfall-shader.js';
+import * as THREE from "three";
+import { oceanShader } from "../liquid-effect/ocean-shader.js";
+import { riverShader } from "../liquid-effect/river-shader.js";
+import { waterfallShader } from "../liquid-effect/waterfall-shader.js";
 
 const _createLiquidMaterial = () => {
   const material = new THREE.ShaderMaterial({
     uniforms: {
       uTime: {
-        value: 0
+        value: 0,
       },
       tDepth: {
-        value: null
+        value: null,
       },
       tMask: {
-        value: null
+        value: null,
       },
       cameraNear: {
-        value: 0
+        value: 0,
       },
       cameraFar: {
-        value: 0
+        value: 0,
       },
       resolution: {
-        value: new THREE.Vector2()
+        value: new THREE.Vector2(),
       },
       foamTexture: {
-        value: null
+        value: null,
       },
       mirror: {
-        value: null
+        value: null,
       },
       refractionTexture: {
-        value: null
+        value: null,
       },
       textureMatrix: {
-        value: null
+        value: null,
       },
       eye: {
-        value: new THREE.Vector3()
+        value: new THREE.Vector3(),
       },
       playerPos: {
-        value: new THREE.Vector3()
+        value: new THREE.Vector3(),
       },
       cameraInWater: {
-        value: null
+        value: null,
       },
       tDistortion: {
-        value: null
+        value: null,
       },
       waterNormalTexture: {
-        value: null
+        value: null,
       },
       cubeMap: {
-        value: null
+        value: null,
       },
       lightPos: {
-        value: new THREE.Vector3()
+        value: new THREE.Vector3(),
       },
       lightIntensity: {
-        value: 0
+        value: 0,
       },
     },
     vertexShader: `\

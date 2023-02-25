@@ -1,13 +1,13 @@
 import * as THREE from "three";
-import {IconPackage, IconMesh} from "../meshes/icon-mesh.js";
-import {glbUrlSpecs} from "../assets.js";
+import { IconPackage, IconMesh } from "../meshes/icon-mesh.js";
+import { glbUrlSpecs } from "../assets.js";
 
 const hudLodDistanceCutoff = 4;
 
 //
 
 export class HudMesh extends THREE.Object3D {
-  constructor({instance, urls}) {
+  constructor({ instance, urls }) {
     super();
 
     this.urls = urls;

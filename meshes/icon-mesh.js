@@ -7,11 +7,11 @@ import {
   MAX_WORLD_HEIGHT,
   maxAnisotropy,
 } from "../constants.js";
-const {useCamera, useGeometries, useGeometryChunking, useProcGenManager} =
+const { useCamera, useGeometries, useGeometryChunking, useProcGenManager } =
   metaversefile;
 const procGenManager = useProcGenManager();
 // const {DoubleSidedPlaneGeometry} = useGeometries();
-const {ChunkedBatchedMesh, ChunkedGeometryAllocator} = useGeometryChunking();
+const { ChunkedBatchedMesh, ChunkedGeometryAllocator } = useGeometryChunking();
 
 //
 
@@ -22,13 +22,13 @@ const localBox = new THREE.Box3();
 
 //
 
-const _loadImage = src =>
+const _loadImage = (src) =>
   new Promise((accept, reject) => {
     const img = new Image();
     img.onload = () => {
       accept(img);
     };
-    img.onerror = err => {
+    img.onerror = (err) => {
       reject(err);
     };
     img.src = src;
@@ -47,10 +47,10 @@ export class IconPackage {
 
   static async loadUrls(urls) {
     const imgs = await Promise.all(
-      urls.map(async url => {
+      urls.map(async (url) => {
         const img = await _loadImage(url);
         return img;
-      }),
+      })
     );
 
     const canvas = document.createElement("canvas");
@@ -75,7 +75,7 @@ export class IconPackage {
 const maxDrawCalls = 256;
 const maxInstancesPerDrawCall = 256;
 export class IconMesh extends ChunkedBatchedMesh {
-  constructor({instance, lodCutoff} = {}) {
+  constructor({ instance, lodCutoff } = {}) {
     // allocator
     const baseGeometry = new THREE.PlaneGeometry(1, 1);
     const allocator = new ChunkedGeometryAllocator(
@@ -96,16 +96,16 @@ export class IconMesh extends ChunkedBatchedMesh {
         maxDrawCalls,
         maxInstancesPerDrawCall,
         boundingType: "box",
-      },
+      }
     );
-    const {textures: attributeTextures} = allocator;
+    const { textures: attributeTextures } = allocator;
     for (const k in attributeTextures) {
       const texture = attributeTextures[k];
       texture.anisotropy = maxAnisotropy;
     }
 
     // geometry
-    const {geometry} = allocator;
+    const { geometry } = allocator;
 
     // material
     const material = new THREE.ShaderMaterial({
@@ -232,7 +232,7 @@ export class IconMesh extends ChunkedBatchedMesh {
 
   addChunk(chunk, chunkResult) {
     if (chunkResult) {
-      const {ps, instances} = chunkResult;
+      const { ps, instances } = chunkResult;
       if (chunk.lod < this.lodCutoff && instances.length > 0) {
         const _renderIconGeometry = (drawCall, ps, instances) => {
           // console.log('got ps', ps.slice());
@@ -275,26 +275,26 @@ export class IconMesh extends ChunkedBatchedMesh {
           drawCall.updateTexture(
             "itemIndex",
             itemIndexOffset,
-            instances.length * 4,
+            instances.length * 4
           );
         };
 
-        const {chunkSize} = this.instance;
+        const { chunkSize } = this.instance;
         const boundingBox = localBox.set(
           localVector.set(
             chunk.min.x * chunkSize,
             -WORLD_BASE_HEIGHT + MIN_WORLD_HEIGHT,
-            chunk.min.y * chunkSize,
+            chunk.min.y * chunkSize
           ),
           localVector2.set(
             (chunk.min.x + chunk.lod) * chunkSize,
             -WORLD_BASE_HEIGHT + MAX_WORLD_HEIGHT,
-            (chunk.min.y + chunk.lod) * chunkSize,
-          ),
+            (chunk.min.y + chunk.lod) * chunkSize
+          )
         );
         const drawChunk = this.allocator.allocChunk(
           instances.length,
-          boundingBox,
+          boundingBox
         );
         _renderIconGeometry(drawChunk, ps, instances);
 
@@ -327,7 +327,7 @@ export class IconMesh extends ChunkedBatchedMesh {
   }
 
   setPackage(pkg) {
-    const {canvas} = pkg;
+    const { canvas } = pkg;
 
     const texture = new THREE.Texture(canvas);
     texture.minFilter = THREE.LinearFilter;

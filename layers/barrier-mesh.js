@@ -7,8 +7,8 @@ import {
   MAX_WORLD_HEIGHT,
 } from "../constants.js";
 
-const {useProcGenManager, useGeometryBuffering} = metaversefile;
-const {BufferedMesh, GeometryAllocator} = useGeometryBuffering();
+const { useProcGenManager, useGeometryBuffering } = metaversefile;
+const { BufferedMesh, GeometryAllocator } = useGeometryBuffering();
 const procGenManager = useProcGenManager();
 
 //
@@ -20,7 +20,7 @@ const localBox = new THREE.Box3();
 //
 
 export class BarrierMesh extends BufferedMesh {
-  constructor({instance, gpuTaskManager}) {
+  constructor({ instance, gpuTaskManager }) {
     const allocator = new GeometryAllocator(
       [
         {
@@ -48,10 +48,10 @@ export class BarrierMesh extends BufferedMesh {
         bufferSize,
         // boundingType: 'box',
         // hasOcclusionCulling: true
-      },
+      }
     );
 
-    const {geometry} = allocator;
+    const { geometry } = allocator;
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uPosition2D: {
@@ -157,7 +157,7 @@ export class BarrierMesh extends BufferedMesh {
           srcIndices,
           dstIndices,
           dstOffset,
-          positionOffset,
+          positionOffset
         ) => {
           const positionIndex = positionOffset / 3;
           for (let i = 0; i < srcIndices.length; i++) {
@@ -167,7 +167,7 @@ export class BarrierMesh extends BufferedMesh {
         const _renderBarrierMeshDataToGeometry = (
           barrierGeometry,
           geometry,
-          geometryBinding,
+          geometryBinding
         ) => {
           const positionOffset = geometryBinding.getAttributeOffset("position");
           const normalOffset = geometryBinding.getAttributeOffset("normal");
@@ -180,55 +180,55 @@ export class BarrierMesh extends BufferedMesh {
             barrierGeometry.indices,
             geometry.index.array,
             indexOffset,
-            positionOffset,
+            positionOffset
           );
 
           geometry.attributes.position.update(
             positionOffset,
             barrierGeometry.positions.length,
             barrierGeometry.positions,
-            0,
+            0
           );
           geometry.attributes.normal.update(
             normalOffset,
             barrierGeometry.normals.length,
             barrierGeometry.normals,
-            0,
+            0
           );
           geometry.attributes.uv.update(
             uvOffset,
             barrierGeometry.uvs.length,
             barrierGeometry.uvs,
-            0,
+            0
           );
           geometry.attributes.position2D.update(
             position2DOffset,
             barrierGeometry.positions2D.length,
             barrierGeometry.positions2D,
-            0,
+            0
           );
           geometry.index.update(indexOffset, barrierGeometry.indices.length);
         };
-        const _handleBarrierMesh = barrierGeometry => {
-          const {chunkSize} = this.instance;
+        const _handleBarrierMesh = (barrierGeometry) => {
+          const { chunkSize } = this.instance;
 
           const boundingBox = localBox.set(
             localVector3D.set(
               chunk.min.x * chunkSize,
               -WORLD_BASE_HEIGHT + MIN_WORLD_HEIGHT,
-              chunk.min.y * chunkSize,
+              chunk.min.y * chunkSize
             ),
             localVector3D2.set(
               (chunk.min.x + chunk.lod) * chunkSize,
               -WORLD_BASE_HEIGHT + MAX_WORLD_HEIGHT,
-              (chunk.min.y + chunk.lod) * chunkSize,
-            ),
+              (chunk.min.y + chunk.lod) * chunkSize
+            )
           );
 
           const geometryBinding = this.allocator.alloc(
             barrierGeometry.positions.length,
             barrierGeometry.indices.length,
-            boundingBox,
+            boundingBox
             // min,
             // max,
             // this.appMatrix,
@@ -238,7 +238,7 @@ export class BarrierMesh extends BufferedMesh {
           _renderBarrierMeshDataToGeometry(
             barrierGeometry,
             this.allocator.geometry,
-            geometryBinding,
+            geometryBinding
           );
 
           this.geometryBindings.set(key, geometryBinding);
