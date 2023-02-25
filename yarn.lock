@@ -105,6 +105,8 @@ __metadata:
     eslint-plugin-jsdoc: latest
     eslint-plugin-promise: latest
     prettier: ^2.8.4
+  peerDependencies:
+    "@webaverse-studios/metaversefile": ^0.0.1
   languageName: unknown
   linkType: soft
 

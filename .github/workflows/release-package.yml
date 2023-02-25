@@ -1,9 +1,11 @@
-name: Node.js Package
+name: Deploy Procgen App to GH Package Registry
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - main
+      - stable
+  
 
 jobs:
   publish-gpr:

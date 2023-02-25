@@ -18,6 +18,9 @@
     "lint:fix": "eslint --fix './**/*.{js,ts}'",
     "format": "prettier --write ./**/*.{js,ts}"
   },
+  "peerDependencies": {
+    "@webaverse-studios/metaversefile": "^0.0.1"
+  },
   "devDependencies": {
     "@webaverse-studios/eslint-config": "^1.0.0",
     "eslint": "^8.34.0",
